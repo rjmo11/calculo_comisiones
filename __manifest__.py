@@ -2,33 +2,37 @@
 {
     'name': "calculo_comisiones",
 
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
+    'summary': "Módulo para la gestión y cálculo de comisiones por ventas y cobranzas",
 
     'description': """
-Long description of module's purpose
+    sistema de cálculo automático de remuneración variable para optimizar 
+    la gestión de incentivos por ventas y cobranzas en una empresa
+    distribuidora de consumo masivo.
     """,
 
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
+    'author': "rjmo11",
+    'website': "https://github.com/rjmo11",
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Sales',
+    'version': '1.0',
 
-    # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base',
+        'sale_management',
+        'account'],
 
-    # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
     ],
-    # only loaded in demonstration mode
+
     'demo': [
         'demo/demo.xml',
     ],
+
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+    'license': 'LGPL-3'
 }
 
