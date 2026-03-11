@@ -17,13 +17,14 @@
     'version': '1.0',
 
     'depends': ['base',
-        'sale_management',
+        'sale',
         'account'],
 
     'data': [
+        'security/calculo_comisiones_security.xml',
         'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+        'views/esquema_comision_views.xml',
+        'views/meta_vendedor_views.xml',
     ],
 
     'demo': [

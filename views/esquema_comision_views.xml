@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Árbol -->
+    <record id="view_esquema_comision_tree" model="ir.ui.view">
+        <field name="name">esquema.comision.tree</field>
+        <field name="model">esquema.comision</field>
+        <field name="arch" type="xml">
+            <tree string="Esquemas de Comisión">
+                <field name="nombre"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista Formulario -->
+    <record id="view_esquema_comision_form" model="ir.ui.view">
+        <field name="name">esquema.comision.form</field>
+        <field name="model">esquema.comision</field>
+        <field name="arch" type="xml">
+            <form string="Esquema de Comisión">
+                <sheet>
+                    <group>
+                        <field name="nombre"/>
+                    </group>
+                    <notebook>
+                        <page string="Escalas de Cumplimiento">
+                            <field name="linea_escala_ids">
+                                <tree editable="bottom">
+                                    <field name="cumplimiento_min"/>
+                                    <field name="cumplimiento_max"/>
+                                    <field name="factor_pago"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción -->
+    <record id="action_esquema_comision" model="ir.actions.act_window">
+        <field name="name">Esquemas de Comisión</field>
+        <field name="res_model">esquema.comision</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menús Principal -->
+    <menuitem id="menu_calculo_comisiones_root"
+              name="Comisiones"
+              web_icon="calculo_comisiones,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_configuracion_comisiones"
+              name="Configuración"
+              parent="menu_calculo_comisiones_root"
+              sequence="100"/>
+
+    <menuitem id="menu_esquema_comision"
+              name="Esquemas de Comisión"
+              parent="menu_configuracion_comisiones"
+              action="action_esquema_comision"
+              sequence="10"/>
+</odoo>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Árbol -->
+    <record id="view_meta_vendedor_tree" model="ir.ui.view">
+        <field name="name">meta.vendedor.tree</field>
+        <field name="model">meta.vendedor</field>
+        <field name="arch" type="xml">
+            <tree string="Metas de Vendedores">
+                <header>
+                    <button name="accion_duplicar_periodo" string="Duplicar Periodo" type="object" class="oe_highlight"/>
+                </header>
+                <field name="vendedor_id"/>
+                <field name="periodo_mes"/>
+                <field name="periodo_anio"/>
+                <field name="meta_venta"/>
+                <field name="meta_cobranza"/>
+                <field name="moneda_id" column_invisible="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista Formulario -->
+    <record id="view_meta_vendedor_form" model="ir.ui.view">
+        <field name="name">meta.vendedor.form</field>
+        <field name="model">meta.vendedor</field>
+        <field name="arch" type="xml">
+            <form string="Meta de Vendedor">
+                <sheet>
+                    <group>
+                        <group string="Información General">
+                            <field name="vendedor_id"/>
+                            <field name="es_supervisor"/>
+                            <field name="moneda_id"/>
+                        </group>
+                        <group string="Periodo">
+                            <field name="periodo_mes"/>
+                            <field name="periodo_anio"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Metas (Importes)">
+                            <field name="meta_venta"/>
+                            <field name="meta_cobranza"/>
+                        </group>
+                        <group string="Bonos Base (100%)">
+                            <field name="bono_base_venta"/>
+                            <field name="bono_base_cobranza"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista Búsqueda -->
+    <record id="view_meta_vendedor_search" model="ir.ui.view">
+        <field name="name">meta.vendedor.search</field>
+        <field name="model">meta.vendedor</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Metas">
+                <field name="vendedor_id"/>
+                <field name="periodo_mes"/>
+                <field name="periodo_anio"/>
+                <filter string="Mis Metas" name="my_goals" domain="[('vendedor_id', '=', uid)]"/>
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Vendedor" name="group_by_vendedor" context="{'group_by': 'vendedor_id'}"/>
+                    <filter string="Mes" name="group_by_mes" context="{'group_by': 'periodo_mes'}"/>
+                    <filter string="Año" name="group_by_anio" context="{'group_by': 'periodo_anio'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción -->
+    <record id="action_meta_vendedor" model="ir.actions.act_window">
+        <field name="name">Metas de Vendedores</field>
+        <field name="res_model">meta.vendedor</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_meta_vendedor_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea la primera meta para un vendedor.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menú -->
+    <menuitem id="menu_meta_vendedor"
+              name="Metas de Vendedores"
+              parent="menu_calculo_comisiones_root"
+              action="action_meta_vendedor"
+              sequence="20"/>
+</odoo>
