@@ -18,7 +18,8 @@
 
     'depends': ['base',
         'sale',
-        'account'],
+        'account',
+        'sale_commission'],
 
     'data': [
         'security/calculo_comisiones_security.xml',

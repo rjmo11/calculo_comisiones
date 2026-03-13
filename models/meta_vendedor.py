@@ -14,6 +14,9 @@ class MetaVendedor(models.Model):
         domain=[('share', '=', False), ('active', '=', True)],
         help="Usuario vendedor activo"
     )
+    esquema_id = fields.Many2one(
+        'esquema.comision', string='Esquema de Comisión', required=True
+    )
     es_supervisor = fields.Boolean(string='¿Es Supervisor?', default=False)
     periodo_mes = fields.Selection([
         ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'), ('4', 'Abril'),

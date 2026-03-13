@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
-        <record id="module_category_calculo_comisiones" model="ir.module.category">
+    <data noupdate="0"> <record id="module_category_calculo_comisiones" model="ir.module.category">
             <field name="name">Cálculo de Comisiones</field>
-            <field name="description">Gestión de comisiones para distribuidoras.</field>
+            <field name="description">Gestión de comisiones para distribuidoras Dimac 21.</field>
             <field name="sequence">10</field>
         </record>
 
@@ -20,21 +19,17 @@
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
-        <!-- Regla de Registro: Vendedores solo ven sus propias metas -->
         <record id="rule_meta_vendedor_personal" model="ir.rule">
-            <field name="name">Metas Personales</field>
+            <field name="name">Metas Personales: Solo Lectura</field>
             <field name="model_id" ref="model_meta_vendedor"/>
             <field name="domain_force">[('vendedor_id', '=', user.id)]</field>
             <field name="groups" eval="[(4, ref('group_calculo_comisiones_vendedor'))]"/>
             <field name="perm_read" eval="True"/>
-            <field name="perm_write" eval="True"/>
-            <field name="perm_create" eval="True"/>
-            <field name="perm_unlink" eval="False"/>
+            <field name="perm_write" eval="False"/> <field name="perm_create" eval="False"/> <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Regla de Registro: Admin ve todo -->
         <record id="rule_meta_vendedor_all" model="ir.rule">
-            <field name="name">Todas las Metas</field>
+            <field name="name">Todas las Metas: Acceso Total Admin</field>
             <field name="model_id" ref="model_meta_vendedor"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_calculo_comisiones_admin'))]"/>

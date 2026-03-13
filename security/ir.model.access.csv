@@ -4,4 +4,4 @@ access_esquema_comision_linea_admin,esquema.comision.linea.admin,model_esquema_c
 access_meta_vendedor_admin,meta.vendedor.admin,model_meta_vendedor,group_calculo_comisiones_admin,1,1,1,1
 access_esquema_comision_vendedor,esquema.comision.vendedor,model_esquema_comision,group_calculo_comisiones_vendedor,1,0,0,0
 access_esquema_comision_linea_vendedor,esquema.comision.linea.vendedor,model_esquema_comision_linea,group_calculo_comisiones_vendedor,1,0,0,0
-access_meta_vendedor_vendedor,meta.vendedor.vendedor,model_meta_vendedor,group_calculo_comisiones_vendedor,1,1,1,0
+access_meta_vendedor_vendedor,meta.vendedor.vendedor,model_meta_vendedor,group_calculo_comisiones_vendedor,1,0,0,0
