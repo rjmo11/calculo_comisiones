@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 class EsquemaComision(models.Model):
     _name = 'esquema.comision'
     _description = 'Esquema de Comisión'
+    _rec_name = 'nombre'
 
     nombre = fields.Char(string='Nombre del Esquema', required=True)
     linea_escala_ids = fields.One2many(
