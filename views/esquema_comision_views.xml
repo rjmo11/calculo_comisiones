@@ -25,9 +25,9 @@
                         <page string="Escalas de Cumplimiento">
                             <field name="linea_escala_ids">
                                 <list editable="bottom">
-                                    <field name="cumplimiento_min"/>
-                                    <field name="cumplimiento_max"/>
-                                    <field name="factor_pago"/>
+                                    <field name="cumplimiento_min" widget="percentage"/>
+                                    <field name="cumplimiento_max" widget="percentage"/>
+                                    <field name="factor_pago" widget="percentage"/>
                                 </list>
                             </field>
                         </page>

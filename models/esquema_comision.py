@@ -18,9 +18,9 @@ class EsquemaComisionLinea(models.Model):
     _order = 'cumplimiento_min'
 
     esquema_id = fields.Many2one('esquema.comision', string='Esquema', ondelete='cascade')
-    cumplimiento_min = fields.Float(string='% Cumplimiento Mínimo', required=True)
-    cumplimiento_max = fields.Float(string='% Cumplimiento Máximo', required=True)
-    factor_pago = fields.Float(string='Factor de Pago', required=True, help="Multiplicador del bono (ej. 0.8 para 80%)")
+    cumplimiento_min = fields.Float(string='Cumplimiento Mínimo', required=True)
+    cumplimiento_max = fields.Float(string='Cumplimiento Máximo', required=True)
+    factor_pago = fields.Float(string='Factor de Pago (%)', required=True, help="Multiplicador del bono (ej. 0.8 para 80%)")
 
     @api.constrains('cumplimiento_min', 'cumplimiento_max')
     def _check_rangos(self):

@@ -1,30 +1,91 @@
 <odoo>
-    <data>
-<!--
-          <record id="object0" model="calculo_comisiones.calculo_comisiones">
-            <field name="name">Object 0</field>
-            <field name="value">0</field>
-          </record>
+    <data noupdate="1">
+        <!-- CATEGORÍAS DE PRODUCTOS -->
+        <record id="cat_tintes" model="product.category">
+            <field name="name">Tintes de Cabello</field>
+        </record>
+        <record id="cat_cuidado_capilar" model="product.category">
+            <field name="name">Cuidado Capilar</field>
+        </record>
 
-          <record id="object1" model="calculo_comisiones.calculo_comisiones">
-            <field name="name">Object 1</field>
-            <field name="value">10</field>
-          </record>
+        <!-- PRODUCTOS (Tintes, decolorantes, shampoos) -->
+        <record id="product_tinte_rubio" model="product.product">
+            <field name="name">Tinte Rubio Ceniza 8.1</field>
+            <field name="categ_id" ref="cat_tintes"/>
+            <field name="list_price">15.00</field>
+            <field name="standard_price">8.00</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_tinte_castano" model="product.product">
+            <field name="name">Tinte Castaño Oscuro 3.0</field>
+            <field name="categ_id" ref="cat_tintes"/>
+            <field name="list_price">14.00</field>
+            <field name="standard_price">7.50</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_tinte_rojo" model="product.product">
+            <field name="name">Tinte Rojo Intenso 6.66</field>
+            <field name="categ_id" ref="cat_tintes"/>
+            <field name="list_price">16.00</field>
+            <field name="standard_price">9.00</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_shampoo_color" model="product.product">
+            <field name="name">Shampoo Protector de Color 500ml</field>
+            <field name="categ_id" ref="cat_cuidado_capilar"/>
+            <field name="list_price">20.00</field>
+            <field name="standard_price">10.00</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_decolorante" model="product.product">
+            <field name="name">Polvo Decolorante 500g</field>
+            <field name="categ_id" ref="cat_tintes"/>
+            <field name="list_price">25.00</field>
+            <field name="standard_price">12.00</field>
+            <field name="type">consu</field>
+        </record>
 
-          <record id="object2" model="calculo_comisiones.calculo_comisiones">
-            <field name="name">Object 2</field>
-            <field name="value">20</field>
-          </record>
+        <!-- CLIENTES (Salones de belleza y supermercados) -->
+        <record id="partner_salon_belleza_1" model="res.partner">
+            <field name="name">Salón de Belleza Elegance</field>
+            <field name="is_company">True</field>
+            <field name="city">Madrid</field>
+            <field name="phone">+34 600 111 222</field>
+            <field name="email">contacto@salonelegance.demo</field>
+        </record>
+        <record id="partner_salon_belleza_2" model="res.partner">
+            <field name="name">Peluquería Estilo y Color</field>
+            <field name="is_company">True</field>
+            <field name="city">Barcelona</field>
+            <field name="phone">+34 600 333 444</field>
+            <field name="email">info@estiloycolor.demo</field>
+        </record>
+        <record id="partner_supermercado_mayorista" model="res.partner">
+            <field name="name">Supermercados Belleza Mayoristas</field>
+            <field name="is_company">True</field>
+            <field name="city">Valencia</field>
+            <field name="phone">+34 600 555 666</field>
+            <field name="email">compras@bellezamayoristas.demo</field>
+        </record>
 
-          <record id="object3" model="calculo_comisiones.calculo_comisiones">
-            <field name="name">Object 3</field>
-            <field name="value">30</field>
-          </record>
-
-          <record id="object4" model="calculo_comisiones.calculo_comisiones">
-            <field name="name">Object 4</field>
-            <field name="value">40</field>
-          </record>
--->
+        <!-- USUARIOS (Vendedores y Administradores) -->
+        <record id="user_vendedor_1" model="res.users">
+            <field name="name">María Vendedora</field>
+            <field name="login">maria.vendedora@demo.com</field>
+            <field name="password">vendedor123</field>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="user_vendedor_2" model="res.users">
+            <field name="name">Carlos Comercial</field>
+            <field name="login">carlos.comercial@demo.com</field>
+            <field name="password">vendedor123</field>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="user_admin_ventas" model="res.users">
+            <field name="name">Ana Administradora</field>
+            <field name="login">ana.admin@demo.com</field>
+            <field name="password">admin123</field>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+        </record>
     </data>
 </odoo>

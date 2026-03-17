@@ -26,10 +26,10 @@
         'security/ir.model.access.csv',
         'views/esquema_comision_views.xml',
         'views/meta_vendedor_views.xml',
+        'demo/demo.xml',
     ],
 
     'demo': [
-        'demo/demo.xml',
     ],
 
     'installable': True,
