@@ -30,6 +30,10 @@ class MetaVendedor(models.Model):
         'res.currency', string='Moneda', required=True,
         default=lambda self: self.env.ref('base.VES').id or self.env.company.currency_id.id
     )
+    state = fields.Selection([
+        ('active', 'Activo'),
+        ('inactive', 'Inactivo')
+    ], string='Estado', default='active', required=True)
     
     meta_venta = fields.Monetary(string='Meta Venta', currency_field='moneda_id')
     meta_cobranza = fields.Monetary(string='Meta Cobranza', currency_field='moneda_id')

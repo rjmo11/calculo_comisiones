@@ -4,14 +4,15 @@
         <field name="name">calculo.comision.tree</field>
         <field name="model">calculo.comision</field>
         <field name="arch" type="xml">
-            <tree string="Cálculos de Comisión" decoration-info="state == 'draft'" decoration-success="state == 'approved'">
+            <list string="Cálculos de Comisión" decoration-info="state == 'draft'" decoration-warning="state == 'calculated'" decoration-success="state == 'approved'">
                 <field name="name"/>
                 <field name="vendedor_id"/>
                 <field name="fecha_inicio"/>
                 <field name="fecha_fin"/>
-                <field name="total_a_pagar"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="total_a_pagar" sum="Total"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'calculated'" decoration-success="state == 'approved'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -32,10 +33,13 @@
                             <field name="name" readonly="1"/>
                         </h1>
                     </div>
+                    <field name="currency_id" invisible="1"/>
                     <group>
                         <group>
                             <field name="vendedor_id" readonly="state != 'draft'"/>
-                            <field name="meta_id" context="{'default_vendedor_id': vendedor_id}" readonly="state != 'draft'"/>
+                            <field name="meta_id" context="{'default_vendedor_id': vendedor_id}" 
+                                   domain="[('vendedor_id', '=', vendedor_id), ('state', '=', 'active')]"
+                                   readonly="state != 'draft'"/>
                         </group>
                         <group>
                             <field name="fecha_inicio" readonly="state != 'draft'"/>
@@ -46,40 +50,44 @@
                         <page string="Resultados y Liquidación" name="resultados">
                             <group>
                                 <group string="Ventas">
-                                    <field name="venta_real_monto"/>
+                                    <field name="meta_venta" widget="monetary"/>
+                                    <field name="venta_real_monto" widget="monetary"/>
                                     <field name="porcentaje_cumplimiento_v" widget="percentage"/>
-                                    <field name="monto_bono_venta"/>
+                                    <field name="bono_base_venta" widget="monetary"/>
+                                    <field name="monto_bono_venta" widget="monetary"/>
                                 </group>
                                 <group string="Cobranzas">
-                                    <field name="cobranza_real_monto"/>
+                                    <field name="meta_cobranza" widget="monetary"/>
+                                    <field name="cobranza_real_monto" widget="monetary"/>
                                     <field name="porcentaje_cumplimiento_c" widget="percentage"/>
-                                    <field name="monto_bono_cobranza"/>
+                                    <field name="bono_base_cobranza" widget="monetary"/>
+                                    <field name="monto_bono_cobranza" widget="monetary"/>
                                 </group>
                             </group>
                             <group class="oe_subtotal_footer oe_right">
-                                <field name="total_a_pagar" class="oe_subtotal_footer_separator"/>
+                                <field name="total_a_pagar" widget="monetary" class="oe_subtotal_footer_separator"/>
                             </group>
                         </page>
                         <page string="Detalle de Facturas" name="facturas">
                             <field name="factura_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="name"/>
                                     <field name="partner_id"/>
                                     <field name="invoice_date"/>
                                     <field name="amount_untaxed" sum="Total Base"/>
                                     <field name="state"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Detalle de Pagos" name="pagos">
                             <field name="pago_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="name"/>
                                     <field name="partner_id"/>
                                     <field name="date"/>
                                     <field name="amount" sum="Total Cobrado"/>
                                     <field name="state"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -97,7 +105,7 @@
     <record id="action_calculo_comision" model="ir.actions.act_window">
         <field name="name">Cálculo de Comisiones</field>
         <field name="res_model">calculo.comision</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Crea un nuevo cálculo de comisión

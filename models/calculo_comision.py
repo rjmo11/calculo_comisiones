@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class CalculoComision(models.Model):
     _name = 'calculo.comision'
@@ -19,22 +19,41 @@ class CalculoComision(models.Model):
         ('approved', 'Aprobado')
     ], string='Estado', default='draft', tracking=True)
 
+    # Relación de Monedas y Metas (para mostrar comparaciones en la vista)
+    currency_id = fields.Many2one('res.currency', related='meta_id.moneda_id')
+    meta_venta = fields.Monetary(related='meta_id.meta_venta', string='Meta Venta')
+    meta_cobranza = fields.Monetary(related='meta_id.meta_cobranza', string='Meta Cobranza')
+    bono_base_venta = fields.Monetary(related='meta_id.bono_base_venta', string='Bono Base Venta')
+    bono_base_cobranza = fields.Monetary(related='meta_id.bono_base_cobranza', string='Bono Base Cobranza')
+
     # Resultados Reales (Ventas y Cobranzas)
-    venta_real_monto = fields.Float(string='Venta Real', readonly=True, tracking=True)
-    cobranza_real_monto = fields.Float(string='Cobranza Real', readonly=True, tracking=True)
+    venta_real_monto = fields.Monetary(string='Venta Real', currency_field='currency_id', readonly=True, tracking=True)
+    cobranza_real_monto = fields.Monetary(string='Cobranza Real', currency_field='currency_id', readonly=True, tracking=True)
     
     # Cumplimiento
     porcentaje_cumplimiento_v = fields.Float(string='% Cumplimiento Venta', readonly=True)
     porcentaje_cumplimiento_c = fields.Float(string='% Cumplimiento Cobranza', readonly=True)
     
     # Pagos de Bono
-    monto_bono_venta = fields.Float(string='Bono Venta', readonly=True)
-    monto_bono_cobranza = fields.Float(string='Bono Cobranza', readonly=True)
-    total_a_pagar = fields.Float(string='Total a Pagar', readonly=True, compute='_compute_total_a_pagar', store=True)
+    monto_bono_venta = fields.Monetary(string='Bono Venta Logrado', currency_field='currency_id', readonly=True)
+    monto_bono_cobranza = fields.Monetary(string='Bono Cobranza Logrado', currency_field='currency_id', readonly=True)
+    total_a_pagar = fields.Monetary(string='Total a Pagar', currency_field='currency_id', readonly=True, compute='_compute_total_a_pagar', store=True)
 
     # Relaciones One2Many (Dinámicas / Transientes para la vista)
     factura_ids = fields.Many2many('account.move', string='Facturas Recopiladas', readonly=True)
     pago_ids = fields.Many2many('account.payment', string='Pagos Recopilados', readonly=True)
+
+    @api.constrains('vendedor_id', 'fecha_inicio', 'fecha_fin')
+    def _check_unique_periodo(self):
+        for record in self:
+            domain = [
+                ('id', '!=', record.id),
+                ('vendedor_id', '=', record.vendedor_id.id),
+                ('fecha_inicio', '<=', record.fecha_fin),
+                ('fecha_fin', '>=', record.fecha_inicio),
+            ]
+            if self.search_count(domain) > 0:
+                raise ValidationError(_("Ya existe un cálculo de comisión para este vendedor en el periodo seleccionado o uno que se solapa."))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -67,41 +86,50 @@ class CalculoComision(models.Model):
             total_ventas = sum(facturas.mapped('amount_untaxed'))
             
             # --- 2. CÁLCULO DE COBRANZAS ---
-            # Buscar pagos asociados al vendedor. En Odoo los pagos suelen atarse al partner, 
-            # pero podemos buscar pagos donde el partner tenga a este vendedor asignado (user_id).
-            pagos = self.env['account.payment'].search([
+            # Buscar pagos recibidos en el mes que hayan saldado (conciliado) al menos una factura creada por el vendedor.
+            pagos_todos = self.env['account.payment'].search([
                 ('state', '=', 'posted'),
                 ('payment_type', '=', 'inbound'),
-                ('partner_id.user_id', '=', record.vendedor_id.id),
                 ('date', '>=', record.fecha_inicio),
                 ('date', '<=', record.fecha_fin)
             ])
+            # Filtrar solo aquellos pagos:
+            # a) Conciliados con facturas de ese vendedor
+            # b) O que el vendedor sea el creador del pago (requerimiento: no requiere conciliación bancaria)
+            pagos = pagos_todos.filtered(
+                lambda p: p.create_uid.id == record.vendedor_id.id or 
+                          any(inv.invoice_user_id.id == record.vendedor_id.id for inv in p.reconciled_invoice_ids)
+            )
             total_cobranzas = sum(pagos.mapped('amount'))
 
             # --- 3. EVALUACIÓN DE DESEMPEÑO ---
             meta = record.meta_id
             esquema = meta.esquema_id
             
-            # Evitar división por cero
-            cumpl_venta = (total_ventas / meta.meta_venta * 100) if meta.meta_venta else 0.0
-            cumpl_cobranza = (total_cobranzas / meta.meta_cobranza * 100) if meta.meta_cobranza else 0.0
+            # Ratio de cumplimiento (Para mostrar en widget -> 1.0 = 100%)
+            ratio_venta = (total_ventas / meta.meta_venta) if meta.meta_venta else 0.0
+            ratio_cobranza = (total_cobranzas / meta.meta_cobranza) if meta.meta_cobranza else 0.0
+
+            # Cumplimiento absoluto (Para evaluar en las escalas del 0 a 100 del esquema)
+            cumpl_venta_escala = ratio_venta * 100.0
+            cumpl_cobranza_escala = ratio_cobranza * 100.0
 
             # Buscar factor de pago en la escala
             factor_venta = 0.0
             factor_cobranza = 0.0
 
             for linea in esquema.linea_escala_ids:
-                if linea.cumplimiento_min <= cumpl_venta < linea.cumplimiento_max:
+                if linea.cumplimiento_min <= cumpl_venta_escala < linea.cumplimiento_max:
                     factor_venta = linea.factor_pago
-                if linea.cumplimiento_min <= cumpl_cobranza < linea.cumplimiento_max:
+                if linea.cumplimiento_min <= cumpl_cobranza_escala < linea.cumplimiento_max:
                     factor_cobranza = linea.factor_pago
 
             # Guardar Resultados
             record.write({
                 'venta_real_monto': total_ventas,
                 'cobranza_real_monto': total_cobranzas,
-                'porcentaje_cumplimiento_v': cumpl_venta,
-                'porcentaje_cumplimiento_c': cumpl_cobranza,
+                'porcentaje_cumplimiento_v': ratio_venta,
+                'porcentaje_cumplimiento_c': ratio_cobranza,
                 'monto_bono_venta': meta.bono_base_venta * (factor_venta / 100.0),
                 'monto_bono_cobranza': meta.bono_base_cobranza * (factor_cobranza / 100.0),
                 'factura_ids': [(6, 0, facturas.ids)],
