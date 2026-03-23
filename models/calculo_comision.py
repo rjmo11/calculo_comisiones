@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
@@ -86,54 +85,57 @@ class CalculoComision(models.Model):
             total_ventas = sum(facturas.mapped('amount_untaxed'))
             
             # --- 2. CÁLCULO DE COBRANZAS ---
-            # Buscar pagos recibidos en el mes que hayan saldado (conciliado) al menos una factura creada por el vendedor.
-            pagos_todos = self.env['account.payment'].search([
-                ('state', '=', 'posted'),
-                ('payment_type', '=', 'inbound'),
+            
+            # Lógica de Cobranzas: Buscamos pagos en el rango
+            pagos_periodo = self.env['account.payment'].search([
                 ('date', '>=', record.fecha_inicio),
-                ('date', '<=', record.fecha_fin)
+                ('date', '<=', record.fecha_fin),
+                ('state', 'in', ('posted', 'paid')),
+                ('payment_type', '=', 'inbound')
             ])
-            # Filtrar solo aquellos pagos:
-            # a) Conciliados con facturas de ese vendedor
-            # b) O que el vendedor sea el creador del pago (requerimiento: no requiere conciliación bancaria)
-            pagos = pagos_todos.filtered(
-                lambda p: p.create_uid.id == record.vendedor_id.id or 
-                          any(inv.invoice_user_id.id == record.vendedor_id.id for inv in p.reconciled_invoice_ids)
-            )
-            total_cobranzas = sum(pagos.mapped('amount'))
+            
+            pagos_vendedor = self.env['account.payment']
+            for p in pagos_periodo:
+                # Combinamos lógica: campo explícito OR creador OR facturas
+                if (p.vendedor_id.id == record.vendedor_id.id) or \
+                   (p.create_uid.id == record.vendedor_id.id) or \
+                   any(inv.invoice_user_id.id == record.vendedor_id.id for inv in p.reconciled_invoice_ids):
+                    pagos_vendedor |= p
+            
+            total_cobranzas = sum(pagos_vendedor.mapped('amount'))
 
             # --- 3. EVALUACIÓN DE DESEMPEÑO ---
             meta = record.meta_id
             esquema = meta.esquema_id
             
             # Ratio de cumplimiento (Para mostrar en widget -> 1.0 = 100%)
-            ratio_venta = (total_ventas / meta.meta_venta) if meta.meta_venta else 0.0
-            ratio_cobranza = (total_cobranzas / meta.meta_cobranza) if meta.meta_cobranza else 0.0
+            ratio_v = (total_ventas / meta.meta_venta) if meta.meta_venta else 0.0
+            ratio_c = (total_cobranzas / meta.meta_cobranza) if meta.meta_cobranza else 0.0
 
-            # Cumplimiento absoluto (Para evaluar en las escalas del 0 a 100 del esquema)
-            cumpl_venta_escala = ratio_venta * 100.0
-            cumpl_cobranza_escala = ratio_cobranza * 100.0
+            # Cumplimiento para escalas (0-100)
+            cumpl_venta_escala = ratio_v * 100.0
+            cumpl_cobranza_escala = ratio_c * 100.0
 
-            # Buscar factor de pago en la escala
-            factor_venta = 0.0
-            factor_cobranza = 0.0
+            # Buscar factores de pago (Buscamos la escala más alta alcanzada)
+            escala = esquema.linea_escala_ids.sorted('cumplimiento_min')
+            factor_v = 0.0
+            factor_c = 0.0
+            for linea in escala:
+                if cumpl_venta_escala >= linea.cumplimiento_min:
+                    factor_v = linea.factor_pago
+                if cumpl_cobranza_escala >= linea.cumplimiento_min:
+                    factor_c = linea.factor_pago
 
-            for linea in esquema.linea_escala_ids:
-                if linea.cumplimiento_min <= cumpl_venta_escala < linea.cumplimiento_max:
-                    factor_venta = linea.factor_pago
-                if linea.cumplimiento_min <= cumpl_cobranza_escala < linea.cumplimiento_max:
-                    factor_cobranza = linea.factor_pago
-
-            # Guardar Resultados
+            # Guardar Resultados Finales
             record.write({
                 'venta_real_monto': total_ventas,
                 'cobranza_real_monto': total_cobranzas,
-                'porcentaje_cumplimiento_v': ratio_venta,
-                'porcentaje_cumplimiento_c': ratio_cobranza,
-                'monto_bono_venta': meta.bono_base_venta * (factor_venta / 100.0),
-                'monto_bono_cobranza': meta.bono_base_cobranza * (factor_cobranza / 100.0),
+                'porcentaje_cumplimiento_v': ratio_v,
+                'porcentaje_cumplimiento_c': ratio_c,
+                'monto_bono_venta': meta.bono_base_venta * (factor_v),
+                'monto_bono_cobranza': meta.bono_base_cobranza * (factor_c),
                 'factura_ids': [(6, 0, facturas.ids)],
-                'pago_ids': [(6, 0, pagos.ids)],
+                'pago_ids': [(6, 0, pagos_vendedor.ids)], # Changed 'pagos' to 'pagos_vendedor'
                 'state': 'calculated'
             })
             

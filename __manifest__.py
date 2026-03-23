@@ -19,7 +19,6 @@
     'depends': ['base',
         'sale',
         'account',
-        'sale_commission',
         'mail'],
 
     'data': [
