@@ -12,6 +12,26 @@ class EsquemaComision(models.Model):
         'esquema.comision.linea', 'esquema_id', string='Líneas de Escala'
     )
 
+    @api.constrains('linea_escala_ids')
+    def _check_continuidade_escalas(self):
+        for record in self:
+            if not record.linea_escala_ids:
+                continue
+            # Ordenar las líneas por cumplimiento mínimo
+            lineas_ordenadas = record.linea_escala_ids.sorted('cumplimiento_min')
+            
+            # Verificar que no haya "huecos" entre escalas
+            for i in range(len(lineas_ordenadas) - 1):
+                actual = lineas_ordenadas[i]
+                siguiente = lineas_ordenadas[i+1]
+                
+                # Usamos round para evitar errores minúsculos de precisión en floats
+                if round(actual.cumplimiento_max, 4) != round(siguiente.cumplimiento_min, 4):
+                    raise ValidationError(_(
+                        "Las escalas deben ser continuas. La escala que termina en %s%% "
+                        "debe coincidir con la siguiente que empieza en %s%%."
+                    ) % (actual.cumplimiento_max, siguiente.cumplimiento_min))
+
 class EsquemaComisionLinea(models.Model):
     _name = 'esquema.comision.linea'
     _description = 'Detalle de Escalas de Comisión'

@@ -94,6 +94,7 @@
                 </sheet>
                 <!-- Chatter -->
                 <div class="oe_chatter">
+                    <separator string="Historial y Actividades del Documento"/>
                     <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
