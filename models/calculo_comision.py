@@ -112,30 +112,27 @@ class CalculoComision(models.Model):
             ratio_v = (total_ventas / meta.meta_venta) if meta.meta_venta else 0.0
             ratio_c = (total_cobranzas / meta.meta_cobranza) if meta.meta_cobranza else 0.0
 
-            # Cumplimiento para escalas (0-100)
-            cumpl_venta_escala = ratio_v * 100.0
-            cumpl_cobranza_escala = ratio_c * 100.0
-
-            # Buscar factores de pago (Buscamos la escala más alta alcanzada)
+            # Buscar factores de pago (Buscamos la escala más alta alcanzada usando ratios decimales 0.0 - 1.0)
             escala = esquema.linea_escala_ids.sorted('cumplimiento_min')
             factor_v = 0.0
             factor_c = 0.0
+            
             for linea in escala:
-                if cumpl_venta_escala >= linea.cumplimiento_min:
+                if ratio_v >= linea.cumplimiento_min:
                     factor_v = linea.factor_pago
-                if cumpl_cobranza_escala >= linea.cumplimiento_min:
+                if ratio_c >= linea.cumplimiento_min:
                     factor_c = linea.factor_pago
-
+            
             # Guardar Resultados Finales
             record.write({
                 'venta_real_monto': total_ventas,
                 'cobranza_real_monto': total_cobranzas,
                 'porcentaje_cumplimiento_v': ratio_v,
                 'porcentaje_cumplimiento_c': ratio_c,
-                'monto_bono_venta': meta.bono_base_venta * (factor_v),
-                'monto_bono_cobranza': meta.bono_base_cobranza * (factor_c),
+                'monto_bono_venta': meta.bono_base_venta * factor_v,
+                'monto_bono_cobranza': meta.bono_base_cobranza * factor_c,
                 'factura_ids': [(6, 0, facturas.ids)],
-                'pago_ids': [(6, 0, pagos_vendedor.ids)], # Changed 'pagos' to 'pagos_vendedor'
+                'pago_ids': [(6, 0, pagos_vendedor.ids)],
                 'state': 'calculated'
             })
             
