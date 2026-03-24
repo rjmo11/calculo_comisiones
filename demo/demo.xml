@@ -72,19 +72,37 @@
         <record id="user_vendedor_1" model="res.users">
             <field name="name">María Vendedora</field>
             <field name="login">maria.vendedora@demo.com</field>
-            <field name="password">vendedor123</field>
+            <field name="password">prueba</field>
             <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
         </record>
         <record id="user_vendedor_2" model="res.users">
             <field name="name">Carlos Comercial</field>
             <field name="login">carlos.comercial@demo.com</field>
-            <field name="password">vendedor123</field>
+            <field name="password">prueba</field>
             <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
         </record>
         <record id="user_admin_ventas" model="res.users">
             <field name="name">Ana Administradora</field>
             <field name="login">ana.admin@demo.com</field>
-            <field name="password">admin123</field>
+            <field name="password">prueba</field>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="user_vendedor_3" model="res.users">
+            <field name="name">Karla Vendedora</field>
+            <field name="login">karla.vendedora@demo.com</field>
+            <field name="password">prueba</field>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="user_vendedor_4" model="res.users">
+            <field name="name">Antonio Comercial</field>
+            <field name="login">antonio.comercial@demo.com</field>
+            <field name="password">prueba</field>
+            <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record id="user_admin_ventas2" model="res.users">
+            <field name="name">Fernando Administrador</field>
+            <field name="login">fernando.admin@demo.com</field>
+            <field name="password">prueba</field>
             <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
         </record>
     </data>
