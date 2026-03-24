@@ -72,12 +72,24 @@ class CalculoComision(models.Model):
             if not record.meta_id or not record.meta_id.esquema_id:
                 raise UserError(_("El vendedor no tiene una meta o un esquema de comisión asignado."))
                 
+            # --- DETECCIÓN DE ROL (Vendedor vs Supervisor) ---
+            # Buscamos si el vendedor es líder de algún equipo de ventas
+            equipos_liderados = self.env['crm.team'].search([('user_id', '=', record.vendedor_id.id)])
+            if equipos_liderados:
+                # Caso Supervisor: Calculamos sobre todos los miembros del equipo (incluyéndose a sí mismo)
+                vendedores_a_calcular = equipos_liderados.mapped('member_ids').ids
+                if record.vendedor_id.id not in vendedores_a_calcular:
+                    vendedores_a_calcular.append(record.vendedor_id.id)
+            else:
+                # Caso Vendedor Individual
+                vendedores_a_calcular = [record.vendedor_id.id]
+
             # --- 1. CÁLCULO DE VENTAS ---
-            # Buscar facturas (out_invoice), publicadas (posted), del vendedor en el rango de fechas
+            # Buscar facturas (out_invoice), publicadas (posted), del equipo/vendedor en el rango de fechas
             facturas = self.env['account.move'].search([
                 ('move_type', '=', 'out_invoice'),
                 ('state', '=', 'posted'),
-                ('invoice_user_id', '=', record.vendedor_id.id),
+                ('invoice_user_id', 'in', vendedores_a_calcular),
                 ('invoice_date', '>=', record.fecha_inicio),
                 ('invoice_date', '<=', record.fecha_fin)
             ])
@@ -96,10 +108,10 @@ class CalculoComision(models.Model):
             
             pagos_vendedor = self.env['account.payment']
             for p in pagos_periodo:
-                # Combinamos lógica: campo explícito OR creador OR facturas
-                if (p.vendedor_id.id == record.vendedor_id.id) or \
-                   (p.create_uid.id == record.vendedor_id.id) or \
-                   any(inv.invoice_user_id.id == record.vendedor_id.id for inv in p.reconciled_invoice_ids):
+                # Combinamos lógica: campo explícito OR creador OR facturas vinculadas
+                if (p.vendedor_id.id in vendedores_a_calcular) or \
+                   (p.create_uid.id in vendedores_a_calcular) or \
+                   any(inv.invoice_user_id.id in vendedores_a_calcular for inv in p.reconciled_invoice_ids):
                     pagos_vendedor |= p
             
             total_cobranzas = sum(pagos_vendedor.mapped('amount'))

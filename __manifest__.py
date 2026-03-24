@@ -19,7 +19,8 @@
     'depends': ['base',
         'sale',
         'account',
-        'mail'],
+        'mail',
+        'crm'],
 
     'data': [
         'security/calculo_comisiones_security.xml',
