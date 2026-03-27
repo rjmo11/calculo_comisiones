@@ -149,7 +149,7 @@ class CalculoComision(models.Model):
             })
             
             # Dejar nota en el chatter
-            record.message_post(body=_("Cálculo procesado correctamente. Ventas: %s, Cobranzas: %s") % (total_ventas, total_cobranzas))
+            #record.message_post(body=_("Cálculo procesado correctamente. Ventas: %s, Cobranzas: %s") % (total_ventas, total_cobranzas))
 
     def action_approve(self):
         for record in self:

@@ -3,6 +3,10 @@ access_meta_admin,meta.admin,model_meta_vendedor,group_calculo_comisiones_admin,
 access_calc_admin,calc.admin,model_calculo_comision,group_calculo_comisiones_admin,1,1,1,1
 access_esq_admin,esq.admin,model_esquema_comision,group_calculo_comisiones_admin,1,1,1,1
 access_lin_admin,lin.admin,model_esquema_comision_linea,group_calculo_comisiones_admin,1,1,1,1
+access_meta_supervisor,meta.supervisor,model_meta_vendedor,group_calculo_comisiones_supervisor,1,1,1,0
+access_calc_supervisor,calc.supervisor,model_calculo_comision,group_calculo_comisiones_supervisor,1,1,1,0
+access_esq_supervisor,esq.supervisor,model_esquema_comision,group_calculo_comisiones_supervisor,1,0,0,0
+access_lin_supervisor,lin.supervisor,model_esquema_comision_linea,group_calculo_comisiones_supervisor,1,0,0,0
 access_meta_user,meta.user,model_meta_vendedor,group_calculo_comisiones_vendedor,1,0,0,0
 access_calc_user,calc.user,model_calculo_comision,group_calculo_comisiones_vendedor,1,1,1,0
 access_esq_user,esq.user,model_esquema_comision,group_calculo_comisiones_vendedor,1,0,0,0
