@@ -11,6 +11,9 @@ class EsquemaComision(models.Model):
     linea_escala_ids = fields.One2many(
         'esquema.comision.linea', 'esquema_id', string='Líneas de Escala'
     )
+    meta_ids = fields.One2many(
+        'meta.vendedor', 'esquema_id', string='Metas Asociadas'
+    )
 
     @api.constrains('linea_escala_ids')
     def _check_continuidade_escalas(self):
