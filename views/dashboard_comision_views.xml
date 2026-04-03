@@ -48,7 +48,7 @@
                                             <t t-if="record.vendedor_id.raw_value"><field name="vendedor_id"/></t>
                                             <t t-else="">Mi Progreso Mensual</t>
                                         </h3>
-                                        <small style="color: #7F8C8D;">Desempeño del Empleado</small>
+                                        <small style="color: #7F8C8D;">Desempeño del Vendedor</small>
                                     </div>
                                 </div>
 
