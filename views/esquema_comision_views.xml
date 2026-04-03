@@ -25,9 +25,31 @@
                         <page string="Escalas de Cumplimiento">
                             <field name="linea_escala_ids">
                                 <list editable="bottom">
-                                    <field name="cumplimiento_min" widget="percentage"/>
-                                    <field name="cumplimiento_max" widget="percentage"/>
-                                    <field name="factor_pago" widget="percentage"/>
+                                    <!-- Columnas de símbolo (solo lectura, siempre visibles) -->
+                                    <field name="limite_inferior_display"
+                                           string="Límite Inferior (≥)"
+                                           readonly="1"/>
+                                    <field name="limite_superior_display"
+                                           string="Límite Superior (&lt;)"
+                                           readonly="1"/>
+                                    <!-- Factor de pago -->
+                                    <field name="factor_pago"
+                                           widget="percentage"
+                                           string="Factor de Pago"/>
+                                    <!-- Columnas de edición raw (opcionales) -->
+                                    <field name="cumplimiento_min"
+                                           widget="percentage"
+                                           string="Min % (editar)"
+                                           optional="show"/>
+                                    <field name="cumplimiento_max"
+                                           widget="percentage"
+                                           string="Max % (editar)"
+                                           optional="show"/>
+                                    <!-- Descripción completa del rango -->
+                                    <field name="rango_display"
+                                           string="Rango Completo [a, b)"
+                                           readonly="1"
+                                           optional="show"/>
                                 </list>
                             </field>
                         </page>

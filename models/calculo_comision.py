@@ -124,16 +124,18 @@ class CalculoComision(models.Model):
             ratio_v = (total_ventas / meta.meta_venta) if meta.meta_venta else 0.0
             ratio_c = (total_cobranzas / meta.meta_cobranza) if meta.meta_cobranza else 0.0
 
-            # Buscar factores de pago (Buscamos la escala más alta alcanzada usando ratios decimales 0.0 - 1.0)
-            escala = esquema.linea_escala_ids.sorted('cumplimiento_min')
-            factor_v = 0.0
-            factor_c = 0.0
-            
-            for linea in escala:
-                if ratio_v >= linea.cumplimiento_min:
-                    factor_v = linea.factor_pago
-                if ratio_c >= linea.cumplimiento_min:
-                    factor_c = linea.factor_pago
+            # --- Búsqueda de escala usando intervalos semiabiertos [min, max) ---
+            # Garantiza que 89.99% NO se trate como 90%, coherente con la UI que muestra "< 90%"
+            def _get_factor(ratio):
+                linea = self.env['esquema.comision.linea'].search([
+                    ('esquema_id', '=', esquema.id),
+                    ('cumplimiento_min', '<=', ratio),
+                    ('cumplimiento_max', '>', ratio),
+                ], limit=1)
+                return linea.factor_pago if linea else 0.0
+
+            factor_v = _get_factor(ratio_v)
+            factor_c = _get_factor(ratio_c)
             
             # Guardar Resultados Finales
             record.write({
