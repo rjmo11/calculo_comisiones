@@ -133,8 +133,8 @@ class MetaVendedor(models.Model):
             ratio_c = (total_cobranzas / record.meta_cobranza) if record.meta_cobranza else 0.0
             
             # Limitar visualmente pero mantener la lógica base
-            record.progreso_venta_pct = min(ratio_v * 100.0, 100.0)
-            record.progreso_cobranza_pct = min(ratio_c * 100.0, 100.0)
+            record.progreso_venta_pct = ratio_v * 100.0
+            record.progreso_cobranza_pct = ratio_c * 100.0
 
             # 4. Proyección Odoo ORM (usando intervalo [a, b))
             esquema = record.esquema_id
@@ -145,7 +145,18 @@ class MetaVendedor(models.Model):
                         ('cumplimiento_min', '<=', ratio),
                         ('cumplimiento_max', '>', ratio),
                     ], limit=1)
-                    return linea.factor_pago if linea else 0.0
+                    if linea:
+                        return linea.factor_pago
+                    
+                    # Si el ratio supera la última escala definida, aplicar la máxima
+                    highest = self.env['esquema.comision.linea'].search([
+                        ('esquema_id', '=', esquema.id)
+                    ], order='cumplimiento_max desc', limit=1)
+                    
+                    if highest and ratio >= highest.cumplimiento_max:
+                        return highest.factor_pago
+                        
+                    return 0.0
 
                 factor_v = _get_factor(ratio_v)
                 factor_c = _get_factor(ratio_c)

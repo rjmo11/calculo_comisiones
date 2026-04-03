@@ -48,7 +48,7 @@
                                             <t t-if="record.vendedor_id.raw_value"><field name="vendedor_id"/></t>
                                             <t t-else="">Mi Progreso Mensual</t>
                                         </h3>
-                                        <small style="color: #7F8C8D;">Desempeño del Mes Actual</small>
+                                        <small style="color: #7F8C8D;">Desempeño del Empleado</small>
                                     </div>
                                 </div>
 
@@ -59,9 +59,11 @@
                                     <t t-set="pct_v" t-value="record.progreso_venta_pct.raw_value or 0"/>
                                     <!-- Verdecito si alcanzó 100%, naranja oscuro si está en progreso -->
                                     <t t-set="color_v" t-value="pct_v &gt;= 100 ? '#28a745' : '#FD7E14'"/>
+                                    <!-- Limitar anillo al 100% mecánicamente para el gráfico CSS -->
+                                    <t t-set="draw_v" t-value="pct_v > 100 ? 100 : pct_v"/>
                                     
                                     <div class="d-flex flex-column align-items-center">
-                                        <div t-attf-style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient({{color_v}} {{pct_v}}%, #e9ecef 0); display: flex; align-items: center; justify-content: center;">
+                                        <div t-attf-style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient({{color_v}} {{draw_v}}%, #e9ecef 0); display: flex; align-items: center; justify-content: center;">
                                             <div style="width: 76px; height: 76px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
                                                 <span style="font-size: 16px; font-weight: bold; color: #333;"><t t-esc="Math.floor(pct_v)"/>%</span>
                                             </div>
@@ -75,9 +77,10 @@
                                     <!-- Dona Cobranza -->
                                     <t t-set="pct_c" t-value="record.progreso_cobranza_pct.raw_value or 0"/>
                                     <t t-set="color_c" t-value="pct_c &gt;= 100 ? '#28a745' : '#007BFF'"/>
+                                    <t t-set="draw_c" t-value="pct_c > 100 ? 100 : pct_c"/>
                                     
                                     <div class="d-flex flex-column align-items-center">
-                                        <div t-attf-style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient({{color_c}} {{pct_c}}%, #e9ecef 0); display: flex; align-items: center; justify-content: center;">
+                                        <div t-attf-style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient({{color_c}} {{draw_c}}%, #e9ecef 0); display: flex; align-items: center; justify-content: center;">
                                             <div style="width: 76px; height: 76px; background-color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
                                                 <span style="font-size: 16px; font-weight: bold; color: #333;"><t t-esc="Math.floor(pct_c)"/>%</span>
                                             </div>

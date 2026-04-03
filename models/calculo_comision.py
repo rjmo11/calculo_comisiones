@@ -132,7 +132,18 @@ class CalculoComision(models.Model):
                     ('cumplimiento_min', '<=', ratio),
                     ('cumplimiento_max', '>', ratio),
                 ], limit=1)
-                return linea.factor_pago if linea else 0.0
+                if linea:
+                    return linea.factor_pago
+                
+                # Si superó la escala máxima definida
+                highest = self.env['esquema.comision.linea'].search([
+                    ('esquema_id', '=', esquema.id)
+                ], order='cumplimiento_max desc', limit=1)
+                
+                if highest and ratio >= highest.cumplimiento_max:
+                    return highest.factor_pago
+                    
+                return 0.0
 
             factor_v = _get_factor(ratio_v)
             factor_c = _get_factor(ratio_c)
