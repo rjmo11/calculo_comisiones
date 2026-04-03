@@ -46,6 +46,47 @@ class MetaVendedor(models.Model):
          'El vendedor ya tiene una meta asignada para este periodo (mes/año).')
     ]
 
+    def action_open_calculo_comision(self):
+        """Abre o crea automáticamente el cálculo de comisión para el periodo de la meta actual."""
+        self.ensure_one()
+        
+        CalculoObj = self.env['calculo.comision']
+        calculo = CalculoObj.search([('meta_id', '=', self.id)], order='id desc', limit=1)
+        
+        if not calculo:
+            try:
+                mes = int(self.periodo_mes)
+                anio = int(self.periodo_anio)
+                _weekday, ultimo_dia = calendar.monthrange(anio, mes)
+                fecha_inicio = date(anio, mes, 1)
+                fecha_fin = date(anio, mes, ultimo_dia)
+            except ValueError:
+                fecha_inicio = fields.Date.today()
+                fecha_fin = fields.Date.today()
+                
+            calculo = CalculoObj.create({
+                'vendedor_id': self.vendedor_id.id,
+                'fecha_inicio': fecha_inicio,
+                'fecha_fin': fecha_fin,
+                'meta_id': self.id,
+                'state': 'draft'
+            })
+            
+            # Procedemos a autocalcular la liquidación a la fecha para evitar doble-clic manual
+            try:
+                calculo.action_procesar_calculo()
+            except Exception:
+                pass
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Liquidación Oficial'),
+            'res_model': 'calculo.comision',
+            'res_id': calculo.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
     # --- CAMPOS COMPUTADOS PARA DASHBOARD (EN VIVO) ---
     is_current_month = fields.Boolean(string='Es Mes Actual', compute='_compute_is_current_month', search='_search_is_current_month')
     venta_real_actual = fields.Monetary(string='Venta Real Actual', currency_field='moneda_id', compute='_compute_dashboard_metrics')
@@ -81,7 +122,7 @@ class MetaVendedor(models.Model):
             try:
                 mes = int(record.periodo_mes)
                 anio = int(record.periodo_anio)
-                _, ultimo_dia = calendar.monthrange(anio, mes)
+                _weekday, ultimo_dia = calendar.monthrange(anio, mes)
                 fecha_inicio = date(anio, mes, 1)
                 fecha_fin = date(anio, mes, ultimo_dia)
             except ValueError:
