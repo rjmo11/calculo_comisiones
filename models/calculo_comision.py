@@ -42,6 +42,17 @@ class CalculoComision(models.Model):
     factura_ids = fields.Many2many('account.move', string='Facturas Recopiladas', readonly=True)
     pago_ids = fields.Many2many('account.payment', string='Pagos Recopilados', readonly=True)
 
+    # Identificador de Rol (Útil para Reportes Estáticos)
+    is_supervisor_role = fields.Boolean(
+        string='Es Supervisor', 
+        compute='_compute_is_supervisor_role'
+    )
+
+    @api.depends('vendedor_id')
+    def _compute_is_supervisor_role(self):
+        for record in self:
+            record.is_supervisor_role = bool(self.env['crm.team'].search_count([('user_id', '=', record.vendedor_id.id)]))
+
     @api.constrains('vendedor_id', 'fecha_inicio', 'fecha_fin')
     def _check_unique_periodo(self):
         for record in self:
