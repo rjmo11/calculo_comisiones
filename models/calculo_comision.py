@@ -171,3 +171,15 @@ class CalculoComision(models.Model):
     def action_draft(self):
         for record in self:
             record.state = 'draft'
+
+    def action_export_master_xlsx(self):
+        """Redirige al controlador HTTP para generar el Excel de los registros activos."""
+        if any(r.state not in ['calculated', 'approved'] for r in self):
+            raise ValidationError(_("Solo se pueden exportar liquidaciones que estén en estado 'Calculado' o 'Aprobado' para evitar inconsistencias de recálculo."))
+            
+        ids_str = ','.join([str(record.id) for record in self])
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/calculo_comisiones/export_xlsx?ids=%s' % ids_str,
+            'target': 'self',
+        }

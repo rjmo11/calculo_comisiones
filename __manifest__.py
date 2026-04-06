@@ -26,6 +26,8 @@
         'security/calculo_comisiones_security.xml',
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
+        'report/reports.xml',
+        'report/report_calculo_comision_templates.xml',
         'views/dashboard_comision_views.xml',
         'views/esquema_comision_views.xml',
         'views/meta_vendedor_views.xml',

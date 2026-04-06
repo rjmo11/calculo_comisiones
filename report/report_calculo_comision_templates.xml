@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_calculo_comision_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-12 text-center">
+                                <h2>Recibo de Conformidad de Comisiones</h2>
+                                <h4>Liquidación: <span t-field="doc.name"/></h4>
+                            </div>
+                        </div>
+
+                        <!-- Datos del Trabajador -->
+                        <div class="row" style="margin-bottom: 30px;">
+                            <div class="col-6">
+                                <strong>Trabajador:</strong> <span t-field="doc.vendedor_id.name"/><br/>
+                                <strong>Cédula / RIF:</strong> <span t-field="doc.vendedor_id.partner_id.vat"/><br/>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Periodo:</strong> Del <span t-field="doc.fecha_inicio"/> al <span t-field="doc.fecha_fin"/><br/>
+                                <strong>Fecha de Impresión:</strong> <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                            </div>
+                        </div>
+
+                        <!-- Tabla Resumen -->
+                        <table class="table table-sm table-bordered">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th class="text-end">Meta Asignada</th>
+                                    <th class="text-end">Logro Real</th>
+                                    <th class="text-center">% Cumplimiento</th>
+                                    <th class="text-end">Bono a Pagar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Fila: VENTAS -->
+                                <tr>
+                                    <td><strong>Ventas</strong></td>
+                                    <td class="text-end"><span t-field="doc.meta_venta"/></td>
+                                    <td class="text-end"><span t-field="doc.venta_real_monto"/></td>
+                                    <td class="text-center">
+                                        <span t-esc="'%.2f' % (doc.porcentaje_cumplimiento_v * 100)"/> %
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="doc.monto_bono_venta"/>
+                                    </td>
+                                </tr>
+                                <!-- Fila: COBRANZAS -->
+                                <tr>
+                                    <td><strong>Cobranzas</strong></td>
+                                    <td class="text-end"><span t-field="doc.meta_cobranza"/></td>
+                                    <td class="text-end"><span t-field="doc.cobranza_real_monto"/></td>
+                                    <td class="text-center">
+                                        <span t-esc="'%.2f' % (doc.porcentaje_cumplimiento_c * 100)"/> %
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="doc.monto_bono_cobranza"/>
+                                    </td>
+                                </tr>
+                                <!-- Fila: TOTAL -->
+                                <tr>
+                                    <td colspan="4" class="text-end"><strong>Total a Pagar</strong></td>
+                                    <td class="text-end">
+                                        <strong><span t-field="doc.total_a_pagar"/></strong>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p class="mt-4" style="font-size: 11px; color: #666;">
+                            <em>* Este documento representa un registro oficial de comisiones. Los montos calculados derivan directamente de las tablas de tramos de esquema asignadas y aprobadas por gerencia para este trabajador.</em>
+                        </p>
+
+                        <!-- Firmas -->
+                        <div class="row" style="margin-top: 80px;">
+                            <div class="col-6 text-center">
+                                <hr style="border-top: 1px solid black; width: 80%;"/>
+                                <strong>Firma del Trabajador</strong>
+                            </div>
+                            <div class="col-6 text-center">
+                                <hr style="border-top: 1px solid black; width: 80%;"/>
+                                <strong>Aprobado por Gerencia</strong>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

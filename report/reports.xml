@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acción para el Reporte de PDF (Recibo Individual) -->
+    <record id="action_report_calculo_comision" model="ir.actions.report">
+        <field name="name">Recibo de Conformidad Individual</field>
+        <field name="model">calculo.comision</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">calculo_comisiones.report_calculo_comision_receipt</field>
+        <field name="report_file">calculo_comisiones.report_calculo_comision_receipt</field>
+        <field name="print_report_name">'Recibo - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_calculo_comision"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Acción Server para exportar Maestro Excel (Aparece en Menú Acción) -->
+    <record id="action_export_calculo_xlsx_server" model="ir.actions.server">
+        <field name="name">Exportar Maestro Excel</field>
+        <field name="model_id" ref="model_calculo_comision"/>
+        <field name="binding_model_id" ref="model_calculo_comision"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            if records:
+                action = records.action_export_master_xlsx()
+        </field>
+    </record>
+</odoo>
