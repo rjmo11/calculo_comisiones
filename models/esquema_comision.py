@@ -8,6 +8,11 @@ class EsquemaComision(models.Model):
     _rec_name = 'nombre'
 
     nombre = fields.Char(string='Nombre del Esquema', required=True)
+    active = fields.Boolean(
+        string='Activo', 
+        default=True, 
+        help="Permite archivar el esquema en lugar de eliminarlo para preservar el historial contable."
+    )
     linea_escala_ids = fields.One2many(
         'esquema.comision.linea', 'esquema_id', string='Líneas de Escala'
     )
