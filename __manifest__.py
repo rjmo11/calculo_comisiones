@@ -28,6 +28,7 @@
         'data/ir_sequence_data.xml',
         'report/reports.xml',
         'report/report_calculo_comision_templates.xml',
+        'views/account_payment_views.xml',
         'views/dashboard_comision_views.xml',
         'views/esquema_comision_views.xml',
         'views/meta_vendedor_views.xml',
