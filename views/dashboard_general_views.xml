@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Maestra del Dashboard (Formulario Trucado) -->
+    <record id="view_comision_dashboard_general_form" model="ir.ui.view">
+        <field name="name">comision.dashboard.general.form</field>
+        <field name="model">comision.dashboard.general</field>
+        <field name="arch" type="xml">
+            <form string="Control de Mandos" create="0" delete="0">
+                <!-- Escondemos la botonera del form con un CSS oculto si deseamos, 
+                     o la aprovechamos interactiva -->
+                <sheet>
+                    <field name="cumplimiento_general" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    
+                    <!-- ENCABEZADO Y FILTROS -->
+                    <div class="row align-items-center mb-4 pb-3" style="border-bottom: 2px solid #eee;">
+                        <div class="col-8">
+                            <h1 class="text-primary fw-bold" style="font-size: 2.2rem; letter-spacing: -1px;">
+                                <i class="fa fa-tachometer me-2"/> Panel de Control: Comisiones
+                            </h1>
+                        </div>
+                        <div class="col-4 text-end">
+                            <!-- Filtro de Departamento que recarga todo vía onchange -->
+                            <field name="departamento" widget="radio" options="{'horizontal': true}" class="fw-bold"/>
+                        </div>
+                    </div>
+
+                    <!-- TARJETAS KPI (USANDO INVISIBLE CONDICIONAL PARA LOS GATILLOS DE COLORES) -->
+                    <div class="row text-center mb-5">
+                        <!-- KPI 1 Facturado -->
+                        <div class="col-3">
+                            <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #0dcaf0; background: #fafafa;">
+                                <div class="card-body py-4">
+                                    <h6 class="text-muted text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Facturado Mes</h6>
+                                    <h3 class="mb-0 fw-bold text-dark" style="font-size: 1.8rem;"><field name="total_facturado" widget="monetary" options="{'no_symbol': False}"/></h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- KPI 2 Cobrado -->
+                        <div class="col-3">
+                            <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #20c997; background: #fafafa;">
+                                <div class="card-body py-4">
+                                    <h6 class="text-muted text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Total Cobrado Mes</h6>
+                                    <h3 class="mb-0 fw-bold text-dark" style="font-size: 1.8rem;"><field name="total_cobrado" widget="monetary"/></h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 3 RENDIMIENTO (TARJETAS DINÁMICAS POR RENDIMIENTO) -->
+                        <div class="col-3">
+                            <!-- ROJO: < 90% -->
+                            <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #dc3545; background-color: #fdf5f6;" invisible="cumplimiento_general &gt;= 90">
+                                <div class="card-body py-4">
+                                    <h6 class="text-danger text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Riesgo Cumplimiento</h6>
+                                    <h3 class="mb-0 fw-bold text-danger" style="font-size: 1.8rem;"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}"/></h3>
+                                </div>
+                            </div>
+                            <!-- AMARILLO: 90% - 99% -->
+                            <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #ffc107; background-color: #fffdf5;" invisible="cumplimiento_general &lt; 90 or cumplimiento_general &gt;= 100">
+                                <div class="card-body py-4">
+                                    <h6 class="text-warning text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Rendimiento Aceptable</h6>
+                                    <h3 class="mb-0 fw-bold text-warning" style="font-size: 1.8rem;"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}"/></h3>
+                                </div>
+                            </div>
+                            <!-- VERDE: >= 100% -->
+                            <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #198754; background-color: #f5fdf7;" invisible="cumplimiento_general &lt; 100">
+                                <div class="card-body py-4">
+                                    <h6 class="text-success text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Meta Superada</h6>
+                                    <h3 class="mb-0 fw-bold text-success" style="font-size: 1.8rem;"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}"/></h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 4 Bonos -->
+                        <div class="col-3">
+                            <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #6f42c1; background: #fafafa;">
+                                <div class="card-body py-4">
+                                    <h6 class="text-muted text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Desembolso Proyectado</h6>
+                                    <h3 class="mb-0 fw-bold" style="font-size: 1.8rem; color: #6f42c1;"><field name="bono_total_estimado" widget="monetary"/></h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GRÁFICO HORIZONTAL VS BARRAS -->
+                    <div class="row mb-3 mt-5">
+                        <div class="col-12">
+                            <h3 class="fw-bold mb-3" style="border-bottom: 2px solid #333; padding-bottom: 8px;">
+                                <i class="fa fa-bar-chart me-2"/> Gráfico Comparativo: Metas vs Logros (Ventas)
+                            </h3>
+                            <field name="desglose_vendedores_ids">
+                                <list create="0" edit="0" delete="0" default_order="progreso_porcentaje desc">
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="vendedor_id" widget="many2one_avatar"/>
+                                    <field name="meta_venta" widget="monetary" string="Meta Asignada"/>
+                                    <field name="venta_lograda" widget="monetary" string="Logro Real"/>
+                                    <!-- Este widget funciona identico a una barra horizontal -->
+                                    <field name="progreso_porcentaje" widget="progressbar" string="Tasa de Conversión (Gráfico)"/>
+                                    <field name="bono_estimado" widget="monetary" string="Bono Recompensado"/>
+                                </list>
+                            </field>
+                        </div>
+                    </div>
+                    
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACCIÓN SERVIDOR PARA INVOCAR EL DASHBOARD TRANSIENTE -->
+    <!-- En lugar de cargar una vista vacia, un python action crea el singleton al vuelo -->
+    <record id="action_dashboard_gerencial_server" model="ir.actions.server">
+        <field name="name">Vista Gerencial</field>
+        <field name="model_id" ref="calculo_comisiones.model_comision_dashboard_general"/>
+        <field name="state">code</field>
+        <field name="code">
+# Invocamos el método maestro para crear el dashboard con seguridad
+act = env['comision.dashboard.general'].action_get_dashboard()
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Tablero de Control',
+    'res_model': 'comision.dashboard.general',
+    'res_id': act.id,
+    'view_mode': 'form',
+    'target': 'current',
+    'context': {'create': False, 'edit': True}
+}
+        </field>
+    </record>
+
+    <!-- REEMPLAZO DE MENÚ -->
+    <!-- Insertamos el nuevo Dashboard Gerencial arriba de los cálculos -->
+    <menuitem id="menu_dashboard_gerencial_root"
+              name="Dashboard Gerencial"
+              parent="menu_calculo_comisiones_root"
+              action="action_dashboard_gerencial_server"
+              sequence="1"/>
+</odoo>

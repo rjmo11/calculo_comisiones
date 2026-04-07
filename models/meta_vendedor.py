@@ -15,6 +15,12 @@ class MetaVendedor(models.Model):
         domain=[('share', '=', False), ('active', '=', True)],
         help="Usuario vendedor activo"
     )
+    # Rastro del Departamento para el Dashboard
+    tipo_departamento = fields.Selection(
+        related='vendedor_id.sale_team_id.team_type',
+        string='Tipo Departamento',
+        store=True
+    )
     esquema_id = fields.Many2one(
         'esquema.comision', string='Esquema de Comisión', required=True
     )

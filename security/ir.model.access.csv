@@ -11,3 +11,9 @@ access_meta_user,meta.user,model_meta_vendedor,group_calculo_comisiones_vendedor
 access_calc_user,calc.user,model_calculo_comision,group_calculo_comisiones_vendedor,1,1,1,0
 access_esq_user,esq.user,model_esquema_comision,group_calculo_comisiones_vendedor,1,0,0,0
 access_lin_user,lin.user,model_esquema_comision_linea,group_calculo_comisiones_vendedor,1,0,0,0
+access_dash_gen_admin,dash_gen.admin,model_comision_dashboard_general,group_calculo_comisiones_admin,1,1,1,1
+access_dash_vend_admin,dash_vend.admin,model_comision_dashboard_vendedor,group_calculo_comisiones_admin,1,1,1,1
+access_dash_gen_sup,dash_gen.sup,model_comision_dashboard_general,group_calculo_comisiones_supervisor,1,1,1,1
+access_dash_vend_sup,dash_vend.sup,model_comision_dashboard_vendedor,group_calculo_comisiones_supervisor,1,1,1,1
+access_dash_gen_user,dash_gen.user,model_comision_dashboard_general,group_calculo_comisiones_vendedor,1,1,1,1
+access_dash_vend_user,dash_vend.user,model_comision_dashboard_vendedor,group_calculo_comisiones_vendedor,1,1,1,1
