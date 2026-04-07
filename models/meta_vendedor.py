@@ -8,7 +8,6 @@ import calendar
 class MetaVendedor(models.Model):
     _name = 'meta.vendedor'
     _description = 'Metas Mensuales de Vendedor'
-    _rec_name = 'vendedor_id'
 
     vendedor_id = fields.Many2one(
         'res.users', string='Vendedor', required=True,
@@ -52,6 +51,12 @@ class MetaVendedor(models.Model):
         ('vendedor_periodo_unique', 'unique(vendedor_id, periodo_mes, periodo_anio)', 
          'El vendedor ya tiene una meta asignada para este periodo (mes/año).')
     ]
+
+    @api.depends('vendedor_id', 'periodo_mes', 'periodo_anio')
+    def _compute_display_name(self):
+        for record in self:
+            mes_label = dict(self._fields['periodo_mes'].selection).get(record.periodo_mes, '')
+            record.display_name = f"{record.vendedor_id.name} ({mes_label} {record.periodo_anio})"
 
     def action_open_calculo_comision(self):
         """Abre o crea automáticamente el cálculo de comisión para el periodo de la meta actual."""

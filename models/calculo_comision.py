@@ -53,6 +53,21 @@ class CalculoComision(models.Model):
         for record in self:
             record.is_supervisor_role = bool(self.env['crm.team'].search_count([('user_id', '=', record.vendedor_id.id)]))
 
+    @api.onchange('vendedor_id', 'fecha_inicio')
+    def _onchange_vendedor_periodo(self):
+        """ Autopoblado de la meta mensual basado en vendedor y fecha """
+        if self.vendedor_id and self.fecha_inicio:
+            mes = str(self.fecha_inicio.month)
+            anio = self.fecha_inicio.year
+            meta = self.env['meta.vendedor'].search([
+                ('vendedor_id', '=', self.vendedor_id.id),
+                ('periodo_mes', '=', mes),
+                ('periodo_anio', '=', anio),
+                ('state', '=', 'active')
+            ], limit=1)
+            if meta:
+                self.meta_id = meta
+
     @api.constrains('vendedor_id', 'fecha_inicio', 'fecha_fin')
     def _check_unique_periodo(self):
         for record in self:
