@@ -31,7 +31,8 @@ class MetaVendedor(models.Model):
         ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
     ], string='Mes', required=True, default=lambda self: str(date.today().month))
     periodo_anio = fields.Integer(
-        string='Año', required=True, default=lambda self: date.today().year
+        string='Año', required=True, default=lambda self: date.today().year,
+        group_operator=False
     )
     moneda_id = fields.Many2one(
         'res.currency', string='Moneda', required=True,

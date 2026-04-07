@@ -12,9 +12,9 @@
                 <field name="vendedor_id"/>
                 <field name="esquema_id"/>
                 <field name="periodo_mes"/>
-                <field name="periodo_anio"/>
-                <field name="meta_venta"/>
-                <field name="meta_cobranza"/>
+                <field name="periodo_anio" sum=""/>
+                <field name="meta_venta" sum="Total Meta Venta"/>
+                <field name="meta_cobranza" sum="Total Meta Cobranza"/>
                 <field name="moneda_id" column_invisible="True"/>
                 <field name="state" widget="badge" decoration-success="state == 'active'" decoration-info="state == 'inactive'"/>
             </list>
