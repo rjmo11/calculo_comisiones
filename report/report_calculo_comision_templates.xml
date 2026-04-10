@@ -25,7 +25,11 @@
                             </div>
                             <div class="col-9 text-center">
                                 <h3 class="fw-bold mb-0">RECIBO DE CONFORMIDAD DE COMISIONES</h3>
-                                <h5 class="text-muted mt-2">Liquidación del Periodo: <span t-esc="doc.fecha_inicio.strftime('%b %Y').title()"/></h5>
+                                <h5 class="text-muted mt-2">
+                                    Liquidación del Periodo: <span t-esc="doc.fecha_inicio.strftime('%b %Y').title()"/>
+                                    <t t-if="doc.tipo_periodo == 'quincena1'"> - <span class="badge text-bg-warning">1ra Quincena (Meta al 50%)</span></t>
+                                    <t t-if="doc.tipo_periodo == 'quincena2'"> - <span class="badge text-bg-info">2da Quincena (Ajuste Mensual)</span></t>
+                                </h5>
                             </div>
                         </div>
 
@@ -51,25 +55,28 @@
                         <h5 class="mt-4 fw-bold" style="border-bottom: 2px solid #333; padding-bottom: 5px;">SECCIÓN 1: Resumen de Cumplimiento</h5>
                         <table class="table table-sm table-borderless mb-4">
                             <thead>
-                                <tr class="table-header">
+                                <tr class="table-header" style="font-size: 13px;">
                                     <th>Concepto</th>
-                                    <th class="text-end">Meta Asignada</th>
+                                    <th class="text-end">Meta Mensual</th>
+                                    <th class="text-end">Meta Periodo</th>
                                     <th class="text-end">Logro Realizado</th>
                                     <th class="text-center">% Cumplimiento</th>
                                     <th class="text-end">Bono a Pagar</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="dotted-row">
+                                <tr class="dotted-row" style="font-size: 12px;">
                                     <td><strong>Ventas</strong></td>
                                     <td class="text-end"><span t-field="doc.meta_venta"/></td>
+                                    <td class="text-end"><span t-field="doc.meta_venta_aplicada"/></td>
                                     <td class="text-end"><span t-field="doc.venta_real_monto"/></td>
                                     <td class="text-center"><span t-esc="'%.2f' % (doc.porcentaje_cumplimiento_v * 100)"/> %</td>
                                     <td class="text-end"><span t-field="doc.monto_bono_venta"/></td>
                                 </tr>
-                                <tr class="dotted-row">
+                                <tr class="dotted-row" style="font-size: 12px;">
                                     <td><strong>Cobranzas</strong></td>
                                     <td class="text-end"><span t-field="doc.meta_cobranza"/></td>
+                                    <td class="text-end"><span t-field="doc.meta_cobranza_aplicada"/></td>
                                     <td class="text-end"><span t-field="doc.cobranza_real_monto"/></td>
                                     <td class="text-center"><span t-esc="'%.2f' % (doc.porcentaje_cumplimiento_c * 100)"/> %</td>
                                     <td class="text-end"><span t-field="doc.monto_bono_cobranza"/></td>

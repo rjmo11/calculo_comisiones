@@ -90,7 +90,8 @@ class ComisionDashboardGeneral(models.TransientModel):
             'bono_total_estimado': t_bono,
             'cumplimiento_general': cumplimiento,
             'color_cumplimiento': color,
-            'desglose_vendedores_ids': lineas
+            'desglose_vendedores_ids': lineas,
+            'currency_id': self.env.company.currency_id.id
         }
 
     @api.model
@@ -123,4 +124,4 @@ class ComisionDashboardVendedor(models.TransientModel):
     venta_lograda = fields.Monetary(string='Logro Venta', currency_field='currency_id')
     progreso_porcentaje = fields.Float(string='Termómetro de Ventas')
     bono_estimado = fields.Monetary(string='Bono Estimado', currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='dashboard_id.currency_id')
+    currency_id = fields.Many2one('res.currency', string="Moneda")

@@ -37,35 +37,46 @@
                     <group>
                         <group>
                             <field name="vendedor_id" readonly="state != 'draft'"/>
+                            <field name="modo_periodo" widget="radio" options="{'horizontal': true}" readonly="state != 'draft'"/>
+                            <field name="quincena_elegida" widget="radio" options="{'horizontal': true}" invisible="modo_periodo != 'quincenal'" readonly="state != 'draft'"/>
+                            <field name="tipo_periodo" invisible="1"/>
                             <field name="meta_id" context="{'default_vendedor_id': vendedor_id}" 
                                    domain="[('vendedor_id', '=', vendedor_id), ('state', '=', 'active')]"
                                    readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="fecha_inicio" readonly="state != 'draft'"/>
-                            <field name="fecha_fin" readonly="state != 'draft'"/>
+                            <field name="fecha_inicio" readonly="state != 'draft'" invisible="modo_periodo != 'personalizado'"/>
+                            <field name="fecha_fin" readonly="state != 'draft'" invisible="modo_periodo != 'personalizado'"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Resultados y Liquidación" name="resultados">
                             <group>
                                 <group string="Ventas">
-                                    <field name="meta_venta" widget="monetary"/>
+                                    <field name="meta_venta" widget="monetary" string="Meta Venta Mensual"/>
+                                    <field name="meta_venta_aplicada" widget="monetary" string="Meta Venta del Periodo" invisible="not meta_venta_aplicada"/>
                                     <field name="venta_real_monto" widget="monetary"/>
                                     <field name="porcentaje_cumplimiento_v" widget="percentage"/>
-                                    <field name="bono_base_venta" widget="monetary"/>
-                                    <field name="monto_bono_venta" widget="monetary"/>
+                                    <field name="bono_base_venta" widget="monetary" string="Bono Base Venta Mensual"/>
+                                    <field name="bono_base_venta_aplicado" widget="monetary" string="Bono Base Venta del Periodo" invisible="not bono_base_venta_aplicado"/>
+                                    <field name="monto_bono_venta" widget="monetary" string="Bono Venta Logrado"/>
                                 </group>
                                 <group string="Cobranzas">
-                                    <field name="meta_cobranza" widget="monetary"/>
+                                    <field name="meta_cobranza" widget="monetary" string="Meta Cobranza Mensual"/>
+                                    <field name="meta_cobranza_aplicada" widget="monetary" string="Meta Cobranza del Periodo" invisible="not meta_cobranza_aplicada"/>
                                     <field name="cobranza_real_monto" widget="monetary"/>
                                     <field name="porcentaje_cumplimiento_c" widget="percentage"/>
-                                    <field name="bono_base_cobranza" widget="monetary"/>
-                                    <field name="monto_bono_cobranza" widget="monetary"/>
+                                    <field name="bono_base_cobranza" widget="monetary" string="Bono Base Cobranza Mensual"/>
+                                    <field name="bono_base_cobranza_aplicado" widget="monetary" string="Bono Base Cobranza del Periodo" invisible="not bono_base_cobranza_aplicado"/>
+                                    <field name="monto_bono_cobranza" widget="monetary" string="Bono Cobranza Logrado"/>
                                 </group>
                             </group>
                             <group class="oe_subtotal_footer oe_right">
-                                <field name="total_a_pagar" widget="monetary" class="oe_subtotal_footer_separator"/>
+                                <field name="importe_adelanto" widget="monetary" invisible="importe_adelanto == 0"/>
+                                <div class="oe_subtotal_footer_separator oe_inline o_td_label" invisible="importe_adelanto == 0">
+                                    <label for="total_a_pagar"/>
+                                </div>
+                                <field name="total_a_pagar" widget="monetary" class="oe_subtotal_footer_separator" nolabel="1"/>
                             </group>
                         </page>
                         <page string="Detalle de Facturas" name="facturas">
