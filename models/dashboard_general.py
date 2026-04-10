@@ -9,11 +9,18 @@ class ComisionDashboardGeneral(models.TransientModel):
 
     name = fields.Char(default='Vista Gerencial de Resultados')
     
-    departamento = fields.Selection([
-        ('all', 'Toda la Empresa'),
-        ('masivo', 'Consumo Masivo'),
-        ('profesional', 'Consumo Profesional')
-    ], string='Filtrar por Departamento', default='all', required=True)
+    @api.model
+    def _selection_equipos(self):
+        """ Genera la lista de equipos dinámicamente desde el CRM """
+        equipos = self.env['crm.team'].search([])
+        return [('all', 'Toda la Empresa')] + [(str(e.id), e.name) for e in equipos]
+
+    equipo_filter = fields.Selection(
+        selection=_selection_equipos, 
+        string='Filtrar por Equipo', 
+        default='all', 
+        required=True
+    )
     
     # Global KPIs
     total_facturado = fields.Monetary(string='Total Facturado Mes', currency_field='currency_id')
@@ -30,7 +37,7 @@ class ComisionDashboardGeneral(models.TransientModel):
         string='Gráfico Horizontal de Vendedores'
     )
 
-    def _prepare_dashboard_data(self, departamento='all'):
+    def _prepare_dashboard_data(self, equipo_filter='all'):
         """ Lógica central de cálculo (Sin escrituras a DB) """
         today = date.today()
         user = self.env.user
@@ -53,8 +60,8 @@ class ComisionDashboardGeneral(models.TransientModel):
         domain = [('periodo_anio', '=', today.year), ('periodo_mes', '=', str(today.month))]
         if vendedores_permitidos is not None:
             domain.append(('vendedor_id', 'in', vendedores_permitidos))
-        if departamento != 'all':
-            domain.append(('tipo_departamento', '=', departamento))
+        if equipo_filter != 'all':
+            domain.append(('vendedor_id.sale_team_id', '=', int(equipo_filter)))
 
         metas_mes = self.env['meta.vendedor'].search(domain)
         
@@ -76,15 +83,15 @@ class ComisionDashboardGeneral(models.TransientModel):
                 'currency_id': meta.moneda_id.id
             }))
             
-        cumplimiento = (t_facturado / t_meta_v * 100) if t_meta_v > 0 else 0.0
+        cumplimiento = (t_facturado / t_meta_v) if t_meta_v > 0 else 0.0
         color = 'border-success text-success'
-        if cumplimiento < 90.0:
+        if cumplimiento < 0.7:
             color = 'border-danger text-danger'
-        elif cumplimiento < 100.0:
+        elif cumplimiento < 1.0:
             color = 'border-warning text-warning'
 
         return {
-            'departamento': departamento,
+            'equipo_filter': equipo_filter,
             'total_facturado': t_facturado,
             'total_cobrado': t_cobrado,
             'bono_total_estimado': t_bono,
@@ -100,10 +107,10 @@ class ComisionDashboardGeneral(models.TransientModel):
         vals = self._prepare_dashboard_data()
         return self.create(vals)
 
-    @api.onchange('departamento')
-    def _onchange_departamento(self):
+    @api.onchange('equipo_filter')
+    def _onchange_equipo_filter(self):
         """ Recálculo dinámico sin crear registros basura en DB """
-        vals = self._prepare_dashboard_data(departamento=self.departamento)
+        vals = self._prepare_dashboard_data(equipo_filter=self.equipo_filter)
         
         self.total_facturado = vals['total_facturado']
         self.total_cobrado = vals['total_cobrado']
