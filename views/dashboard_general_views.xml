@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Vista de Lista Independiente para las líneas del Dashboard -->
+    <record id="view_comision_dashboard_vendedor_list" model="ir.ui.view">
+        <field name="name">comision.dashboard.vendedor.list</field>
+        <field name="model">comision.dashboard.vendedor</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0" decoration-info="es_supervisor" limit="20">
+                <field name="es_supervisor" column_invisible="True"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="vendedor_id" widget="many2one_avatar_user" string="Persona"/>
+                <field name="es_supervisor" string="Rol" widget="badge" decoration-info="es_supervisor" decoration-success="not es_supervisor"/>
+                <field name="meta_venta" string="Meta Asignada" sum="Total"/>
+                <field name="venta_lograda" string="Logro Período" sum="Total"/>
+                <field name="progreso_porcentaje" string="Avance" widget="progressbar"/>
+                <field name="bono_estimado" string="Bono Estimado" sum="Total" widget="monetary"/>
+            </list>
+        </field>
+    </record>
+
     <!-- Vista Maestra del Dashboard (Formulario Trucado) -->
     <record id="view_comision_dashboard_general_form" model="ir.ui.view">
         <field name="name">comision.dashboard.general.form</field>
@@ -14,20 +32,27 @@
                     
                     <style>
                         .kpi-card-value {
-                            font-size: clamp(1.2rem, 4vw, 1.6rem) !important;
-                            font-weight: 800;
+                            font-size: clamp(1.1rem, 3.8vw, 1.8rem) !important;
+                            font-weight: 700;
+                            letter-spacing: -0.5px; /* Condensado para que entren más números */
                             white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
                         }
                         .kpi-card-value .o_field_monetary {
                             display: flex;
                             justify-content: center;
-                            gap: 8px; /* Espacio entre número y Bs */
+                            align-items: baseline;
+                        }
+                        /* Espaciado absoluto y limpio para la moneda */
+                        .kpi-card-value span.o_currency_symbol {
+                            margin-left: 12px !important;
+                            font-size: 0.65em;
+                            font-weight: 400;
+                            color: #999;
+                            vertical-align: middle;
                         }
                         .kpi-card-title {
-                            font-size: 0.75rem !important;
-                            letter-spacing: 1.5px !important;
+                            font-size: 0.7rem !important;
+                            letter-spacing: 1.2px !important;
                             color: #666;
                             text-transform: uppercase;
                         }
@@ -53,7 +78,7 @@
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #0dcaf0; background: #fafafa;">
                                 <div class="card-body py-4">
                                     <h6 class="kpi-card-title fw-bold mb-2">Total Facturado Mes</h6>
-                                    <div class="kpi-card-value text-dark"><field name="total_facturado" widget="monetary"/></div>
+                                    <div class="kpi-card-value text-dark"><field name="total_facturado" widget="monetary" options="{'precision': 0}"/></div>
                                 </div>
                             </div>
                         </div>
@@ -63,7 +88,7 @@
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #20c997; background: #fafafa;">
                                 <div class="card-body py-4">
                                     <h6 class="kpi-card-title fw-bold mb-2">Total Cobrado Mes</h6>
-                                    <div class="kpi-card-value text-dark"><field name="total_cobrado" widget="monetary"/></div>
+                                    <div class="kpi-card-value text-dark"><field name="total_cobrado" widget="monetary" options="{'precision': 0}"/></div>
                                 </div>
                             </div>
                         </div>
@@ -98,7 +123,7 @@
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #6f42c1; background: #fafafa;">
                                 <div class="card-body py-4">
                                     <h6 class="kpi-card-title fw-bold mb-2">Desembolso Proyectado</h6>
-                                    <div class="kpi-card-value" style="color: #6f42c1;"><field name="bono_total_estimado" widget="monetary"/></div>
+                                    <div class="kpi-card-value" style="color: #6f42c1;"><field name="bono_total_estimado" widget="monetary" options="{'precision': 0}"/></div>
                                 </div>
                             </div>
                         </div>
@@ -110,17 +135,7 @@
                             <h3 class="fw-bold mb-3" style="border-bottom: 2px solid #333; padding-bottom: 8px;">
                                 <i class="fa fa-bar-chart me-2"/> Gráfico Comparativo: Metas vs Logros (Ventas)
                             </h3>
-                            <field name="desglose_vendedores_ids">
-                                <list create="0" edit="0" delete="0" default_order="progreso_porcentaje desc">
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="vendedor_id" widget="many2one_avatar"/>
-                                    <field name="meta_venta" widget="monetary" string="Meta Asignada"/>
-                                    <field name="venta_lograda" widget="monetary" string="Logro Real"/>
-                                    <!-- Este widget funciona identico a una barra horizontal -->
-                                    <field name="progreso_porcentaje" widget="progressbar" string="Tasa de Conversión (Gráfico)"/>
-                                    <field name="bono_estimado" widget="monetary" string="Bono Recompensado"/>
-                                </list>
-                            </field>
+                            <field name="desglose_vendedores_ids" nolabel="1" context="{'tree_view_ref': 'calculo_comisiones.view_comision_dashboard_vendedor_list'}"/>
                         </div>
                     </div>
                     

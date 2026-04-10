@@ -72,13 +72,18 @@ class ComisionDashboardGeneral(models.TransientModel):
         lineas = []
 
         for meta in metas_mes:
-            t_facturado += meta.venta_real_actual
-            t_cobrado += meta.cobranza_real_actual
-            t_meta_v += meta.meta_venta
+            # Solo sumamos al total general si NO es supervisor para evitar duplicidad
+            if not meta.es_supervisor:
+                t_facturado += meta.venta_real_actual
+                t_cobrado += meta.cobranza_real_actual
+                t_meta_v += meta.meta_venta
+            
+            # El bono sí lo sumamos para todos (todos cobran)
             t_bono += meta.comision_proyectada
             
             lineas.append((0, 0, {
                 'vendedor_id': meta.vendedor_id.id,
+                'es_supervisor': meta.es_supervisor,
                 'meta_venta': meta.meta_venta,
                 'venta_lograda': meta.venta_real_actual,
                 'progreso_porcentaje': meta.progreso_venta_pct,
@@ -130,6 +135,7 @@ class ComisionDashboardVendedor(models.TransientModel):
 
     dashboard_id = fields.Many2one('comision.dashboard.general', required=True, ondelete='cascade')
     vendedor_id = fields.Many2one('res.users', string='Vendedor')
+    es_supervisor = fields.Boolean(string='Es Supervisor', store=False)
     meta_venta = fields.Monetary(string='Meta', currency_field='currency_id')
     venta_lograda = fields.Monetary(string='Logro Venta', currency_field='currency_id')
     progreso_porcentaje = fields.Float(string='Termómetro de Ventas')
