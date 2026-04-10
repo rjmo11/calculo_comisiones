@@ -60,8 +60,11 @@ class ComisionDashboardGeneral(models.TransientModel):
         domain = [('periodo_anio', '=', today.year), ('periodo_mes', '=', str(today.month))]
         if vendedores_permitidos is not None:
             domain.append(('vendedor_id', 'in', vendedores_permitidos))
-        if equipo_filter != 'all':
-            domain.append(('vendedor_id.sale_team_id', '=', int(equipo_filter)))
+        if equipo_filter and equipo_filter != 'all' and equipo_filter.isdigit():
+            equipo = self.env['crm.team'].sudo().browse(int(equipo_filter))
+            # Incluir a todos los miembros + el líder del equipo para transparencia total
+            usuarios_equipo = equipo.member_ids.ids + [equipo.user_id.id]
+            domain.append(('vendedor_id', 'in', usuarios_equipo))
 
         metas_mes = self.env['meta.vendedor'].search(domain)
         
