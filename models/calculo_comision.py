@@ -80,24 +80,11 @@ class CalculoComision(models.Model):
         for record in self:
             record.is_supervisor_role = bool(self.env['crm.team'].search_count([('user_id', '=', record.vendedor_id.id)]))
 
-    @api.onchange('vendedor_id', 'fecha_inicio')
-    def _onchange_vendedor_periodo(self):
-        """ Autopoblado de la meta mensual basado en vendedor y fecha """
-        if self.vendedor_id and self.fecha_inicio:
-            mes = str(self.fecha_inicio.month)
-            anio = self.fecha_inicio.year
-            meta = self.env['meta.vendedor'].search([
-                ('vendedor_id', '=', self.vendedor_id.id),
-                ('periodo_mes', '=', mes),
-                ('periodo_anio', '=', anio),
-                ('state', '=', 'active')
-            ], limit=1)
-            if meta:
-                self.meta_id = meta
-
     @api.onchange('vendedor_id', 'fecha_inicio', 'modo_periodo', 'quincena_elegida')
     def _onchange_vendedor_periodo(self):
-        """ Sincroniza la interactividad de la UI con la lógica técnica y fechas """
+        """ Sincroniza la interactividad de la UI con la lógica técnica y fechas. 
+            También limpia resultados anteriores para evitar errores de singleton en Odoo. 
+        """
         import calendar
         from datetime import date
         today = fields.Date.today()
@@ -134,6 +121,20 @@ class CalculoComision(models.Model):
             ], limit=1)
             if meta:
                 self.meta_id = meta
+        
+        # LIMPIEZA DE SEGURIDAD: 
+        # Si el usuario cambia el periodo, borramos los resultados anteriores para evitar 
+        # inconsistencias visuales y errores técnicos de Odoo con múltiples registros.
+        self.factura_ids = [(5, 0, 0)]
+        self.pago_ids = [(5, 0, 0)]
+        self.venta_real_monto = 0.0
+        self.cobranza_real_monto = 0.0
+        self.porcentaje_cumplimiento_v = 0.0
+        self.porcentaje_cumplimiento_c = 0.0
+        self.monto_bono_venta = 0.0
+        self.monto_bono_cobranza = 0.0
+        self.total_a_pagar = 0.0
+        self.state = 'draft'
 
     @api.constrains('vendedor_id', 'fecha_inicio', 'fecha_fin', 'tipo_periodo')
     def _check_unique_periodo(self):
