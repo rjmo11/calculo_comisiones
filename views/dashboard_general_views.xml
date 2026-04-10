@@ -9,11 +9,11 @@
                 <field name="es_supervisor" column_invisible="True"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="vendedor_id" widget="many2one_avatar_user" string="Persona"/>
-                <field name="es_supervisor" string="Rol" widget="badge" decoration-info="es_supervisor" decoration-success="not es_supervisor"/>
-                <field name="meta_venta" string="Meta Asignada" sum="Total"/>
-                <field name="venta_lograda" string="Logro Período" sum="Total"/>
+                <field name="rol_label" string="Rol" widget="badge" decoration-info="es_supervisor" decoration-success="not es_supervisor"/>
+                <field name="meta_venta" string="Meta Asignada"/>
+                <field name="venta_lograda" string="Logro Período"/>
                 <field name="progreso_porcentaje" string="Avance" widget="progressbar"/>
-                <field name="bono_estimado" string="Bono Estimado" sum="Total" widget="monetary"/>
+                <field name="bono_estimado" string="Bono Estimado" widget="monetary"/>
             </list>
         </field>
     </record>
