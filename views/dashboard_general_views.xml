@@ -32,29 +32,49 @@
                     
                     <style>
                         .kpi-card-value {
-                            font-size: clamp(1.1rem, 3.8vw, 1.8rem) !important;
-                            font-weight: 700;
-                            letter-spacing: -0.5px; /* Condensado para que entren más números */
+                            font-size: clamp(2.2rem, 5vw, 2.8rem) !important;
+                            font-weight: 700 !important;
+                            letter-spacing: -1.2px;
                             white-space: nowrap;
-                        }
-                        .kpi-card-value .o_field_monetary {
                             display: flex;
                             justify-content: center;
                             align-items: baseline;
+                            line-height: 1;
                         }
-                        /* Espaciado absoluto y limpio para la moneda */
-                        .kpi-card-value span.o_currency_symbol {
-                            margin-left: 12px !important;
-                            font-size: 0.65em;
-                            font-weight: 400;
-                            color: #999;
-                            vertical-align: middle;
+                        
+                        /* Ensure widgets inside card cells inherit the consistent font size */
+                        .kpi-card-value .o_field_widget {
+                            font-size: inherit !important;
+                            font-weight: inherit !important;
+                            border-bottom: none !important;
                         }
+
+                        /* Fix Odoo monetary and percentage widget internal flex */
+                        .kpi-card-value .o_field_monetary, 
+                        .kpi-card-value .o_field_percentage {
+                            display: inline-flex !important;
+                            align-items: baseline;
+                            text-decoration: none !important;
+                        }
+
+                        /* Global Symbol Styling (Bs.F, %) - Solid and clear */
+                        .kpi-card-value .o_field_monetary span:not(.oe_currency_value),
+                        .kpi-card-value span.o_percentage_symbol,
+                        .kpi-card-value .o_field_percentage span:not(.oe_percentage_value) {
+                            font-size: 0.5em !important;
+                            font-weight: 500 !important;
+                            margin-left: 8px !important;
+                            opacity: 1 !important;
+                            transform: translateY(-0.15em);
+                        }
+
                         .kpi-card-title {
-                            font-size: 0.7rem !important;
-                            letter-spacing: 1.2px !important;
-                            color: #666;
+                            font-size: 0.85rem !important;
+                            letter-spacing: 1.5px !important;
+                            color: #333 !important;
+                            font-weight: 700 !important;
                             text-transform: uppercase;
+                            margin-bottom: 1rem;
                         }
                     </style>
                     
@@ -78,7 +98,7 @@
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #0dcaf0; background: #fafafa;">
                                 <div class="card-body py-4">
                                     <h6 class="kpi-card-title fw-bold mb-2">Total Facturado Mes</h6>
-                                    <div class="kpi-card-value text-dark"><field name="total_facturado" widget="monetary" options="{'precision': 0}"/></div>
+                                    <div class="kpi-card-value text-dark"><field name="total_facturado" widget="monetary" options="{'precision': 0}" readonly="1"/></div>
                                 </div>
                             </div>
                         </div>
@@ -88,7 +108,7 @@
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #20c997; background: #fafafa;">
                                 <div class="card-body py-4">
                                     <h6 class="kpi-card-title fw-bold mb-2">Total Cobrado Mes</h6>
-                                    <div class="kpi-card-value text-dark"><field name="total_cobrado" widget="monetary" options="{'precision': 0}"/></div>
+                                    <div class="kpi-card-value text-dark"><field name="total_cobrado" widget="monetary" options="{'precision': 0}" readonly="1"/></div>
                                 </div>
                             </div>
                         </div>
@@ -98,22 +118,22 @@
                             <!-- ROJO: < 90% -->
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #dc3545; background-color: #fdf5f6;" invisible="cumplimiento_general &gt;= 90">
                                 <div class="card-body py-4">
-                                    <h6 class="text-danger text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Riesgo Cumplimiento</h6>
-                                    <h3 class="mb-0 fw-bold text-danger" style="font-size: 1.8rem;"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}"/></h3>
+                                    <h6 class="text-danger text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Porcentaje de Cumplimiento</h6>
+                                    <div class="kpi-card-value text-danger"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}" readonly="1"/></div>
                                 </div>
                             </div>
                             <!-- AMARILLO: 90% - 99% -->
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #ffc107; background-color: #fffdf5;" invisible="cumplimiento_general &lt; 90 or cumplimiento_general &gt;= 100">
                                 <div class="card-body py-4">
                                     <h6 class="text-warning text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Rendimiento Aceptable</h6>
-                                    <h3 class="mb-0 fw-bold text-warning" style="font-size: 1.8rem;"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}"/></h3>
+                                    <div class="kpi-card-value text-warning"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}" readonly="1"/></div>
                                 </div>
                             </div>
                             <!-- VERDE: >= 100% -->
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #198754; background-color: #f5fdf7;" invisible="cumplimiento_general &lt; 100">
                                 <div class="card-body py-4">
                                     <h6 class="text-success text-uppercase fw-bold mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Meta Superada</h6>
-                                    <h3 class="mb-0 fw-bold text-success" style="font-size: 1.8rem;"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}"/></h3>
+                                    <div class="kpi-card-value text-success"><field name="cumplimiento_general" widget="percentage" options="{'digits': [16, 1]}" readonly="1"/></div>
                                 </div>
                             </div>
                         </div>
@@ -123,7 +143,7 @@
                             <div class="card shadow-sm h-100" style="border-radius: 12px; border-top: 5px solid #6f42c1; background: #fafafa;">
                                 <div class="card-body py-4">
                                     <h6 class="kpi-card-title fw-bold mb-2">Desembolso Proyectado</h6>
-                                    <div class="kpi-card-value" style="color: #6f42c1;"><field name="bono_total_estimado" widget="monetary" options="{'precision': 0}"/></div>
+                                    <div class="kpi-card-value" style="color: #6f42c1;"><field name="bono_total_estimado" widget="monetary" options="{'precision': 0}" readonly="1"/></div>
                                 </div>
                             </div>
                         </div>
