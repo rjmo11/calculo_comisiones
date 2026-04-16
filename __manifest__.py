@@ -33,7 +33,6 @@
         'views/account_payment_views.xml',
         'views/dashboard_general_views.xml',
         'views/dashboard_comision_views.xml',
-        'views/crm_team_views.xml',
         'views/esquema_comision_views.xml',
         'views/meta_vendedor_views.xml',
     ],
