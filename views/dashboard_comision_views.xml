@@ -28,6 +28,7 @@
             <field name="arch" type="xml">
                 <kanban create="0" edit="0" class="o_kanban_dashboard o_kanban_dashboard_comision">
                     <field name="vendedor_id"/>
+                    <field name="user_id"/>
                     <field name="moneda_id"/>
                     <field name="meta_venta"/>
                     <field name="venta_real_actual"/>
@@ -41,14 +42,20 @@
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click" style="border-radius: 12px; padding: 20px; background: white; box-shadow: 0px 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 100%;">
                                 
-                                <!-- Header -->
+                                <!-- Header: nombre del empleado -->
                                 <div class="o_kanban_record_top" style="margin-bottom: 15px;">
                                     <div class="o_kanban_record_headings" style="text-align: center; width: 100%;">
                                         <h3 style="margin: 0; color: #2C3E50; font-weight: 700;">
-                                            <t t-if="record.vendedor_id.raw_value"><field name="vendedor_id"/></t>
+                                            <t t-if="record.vendedor_id.raw_value"><field name="vendedor_id" widget="many2one_avatar_employee"/></t>
                                             <t t-else="">Mi Progreso Mensual</t>
                                         </h3>
-                                        <small style="color: #7F8C8D;">Desempeño del Vendedor</small>
+                                        <!-- Badge de advertencia si no hay usuario vinculado -->
+                                        <t t-if="!record.user_id.raw_value">
+                                            <span class="badge bg-warning text-dark mt-1">
+                                                <i class="fa fa-exclamation-triangle me-1"/>Sin usuario vinculado
+                                            </span>
+                                        </t>
+                                        <small style="color: #7F8C8D;">Desempeño del Empleado</small>
                                     </div>
                                 </div>
 

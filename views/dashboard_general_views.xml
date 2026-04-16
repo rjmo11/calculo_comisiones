@@ -5,14 +5,18 @@
         <field name="name">comision.dashboard.vendedor.list</field>
         <field name="model">comision.dashboard.vendedor</field>
         <field name="arch" type="xml">
-            <list create="0" delete="0" decoration-info="es_supervisor" limit="20">
+            <list create="0" delete="0" decoration-info="es_supervisor" decoration-warning="sin_usuario" limit="20">
                 <field name="es_supervisor" column_invisible="True"/>
+                <field name="sin_usuario" column_invisible="True"/>
                 <field name="currency_id" column_invisible="True"/>
-                <field name="vendedor_id" widget="many2one_avatar_user" string="Persona"/>
+                <field name="vendedor_id" widget="many2one_avatar_employee" string="Empleado"/>
                 <field name="rol_label" string="Rol" widget="badge" decoration-info="es_supervisor" decoration-success="not es_supervisor"/>
-                <field name="meta_venta" string="Meta Asignada"/>
-                <field name="venta_lograda" string="Logro Período"/>
-                <field name="progreso_porcentaje" string="Avance" widget="progressbar"/>
+                <field name="meta_venta" string="Meta (Ventas)"/>
+                <field name="venta_lograda" string="Logro (Ventas)"/>
+                <field name="progreso_porcentaje" string="%" widget="progressbar"/>
+                <field name="meta_cobranza" string="Meta (Cobranza)"/>
+                <field name="cobranza_lograda" string="Logro (Cobranza)"/>
+                <field name="progreso_cobranza_porcentaje" string="%" widget="progressbar"/>
                 <field name="bono_estimado" string="Bono Estimado" widget="monetary"/>
             </list>
         </field>
@@ -153,7 +157,7 @@
                     <div class="row mb-3 mt-5">
                         <div class="col-12">
                             <h3 class="fw-bold mb-3" style="border-bottom: 2px solid #333; padding-bottom: 8px;">
-                                <i class="fa fa-bar-chart me-2"/> Gráfico Comparativo: Metas vs Logros (Ventas)
+                                <i class="fa fa-bar-chart me-2"/> Gráfico Comparativo: Desempeño del Equipo (Ventas y Cobranzas)
                             </h3>
                             <field name="desglose_vendedores_ids" nolabel="1" context="{'tree_view_ref': 'calculo_comisiones.view_comision_dashboard_vendedor_list'}"/>
                         </div>

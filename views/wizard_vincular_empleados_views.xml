@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Formulario del Wizard -->
+    <record id="view_wizard_vincular_empleados_form" model="ir.ui.view">
+        <field name="name">wizard.vincular.empleados.form</field>
+        <field name="model">wizard.vincular.empleados</field>
+        <field name="arch" type="xml">
+            <form string="Vincular Usuarios → Empleados">
+                <sheet>
+                    <!-- Encabezado descriptivo -->
+                    <div class="alert alert-info" role="alert" invisible="ejecutado">
+                        <strong>¿Qué hace este asistente?</strong><br/>
+                        Recorre los usuarios del sistema y crea automáticamente un registro
+                        <strong>hr.employee</strong> para cada uno, vinculándolo mediante el campo
+                        <code>user_id</code>. Esto es necesario para que el módulo de comisiones
+                        funcione correctamente con empleados como entidad principal.
+                    </div>
+
+                    <!-- Resultado post-ejecución -->
+                    <div class="alert alert-success" role="alert" invisible="not ejecutado">
+                        <strong>Proceso completado.</strong> Revisa el detalle a continuación.
+                    </div>
+
+                    <group>
+                        <group string="Opciones">
+                            <field name="solo_equipos_crm" readonly="ejecutado"/>
+                        </group>
+                    </group>
+
+                    <!-- Área de resultado (visible solo tras ejecutar) -->
+                    <group invisible="not ejecutado">
+                        <field name="resultado_texto"
+                               widget="text"
+                               readonly="1"
+                               string="Detalle del Proceso"
+                               nolabel="0"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <!-- Botón principal: ejecutar vinculación -->
+                    <button name="action_vincular"
+                            string="Vincular Ahora"
+                            type="object"
+                            class="btn-primary"
+                            invisible="ejecutado"/>
+                    <!-- Cerrar tras ver resultado -->
+                    <button string="Cerrar"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción que lanza el wizard -->
+    <record id="action_wizard_vincular_empleados" model="ir.actions.act_window">
+        <field name="name">Vincular Usuarios → Empleados</field>
+        <field name="res_model">wizard.vincular.empleados</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Ítem de menú: solo visible para administradores del módulo -->
+    <menuitem id="menu_wizard_vincular_empleados"
+              name="Vincular Usuarios → Empleados"
+              parent="menu_calculo_comisiones_root"
+              action="action_wizard_vincular_empleados"
+              sequence="99"
+              groups="calculo_comisiones.group_calculo_comisiones_admin"/>
+</odoo>

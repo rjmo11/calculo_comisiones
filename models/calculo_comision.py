@@ -7,7 +7,22 @@ class CalculoComision(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Referencia', required=True, copy=False, readonly=True, default=lambda self: _('Nuevo'))
-    vendedor_id = fields.Many2one('res.users', string='Vendedor', required=True, tracking=True)
+    vendedor_id = fields.Many2one(
+        'hr.employee',
+        string='Empleado Vendedor',
+        required=True,
+        tracking=True,
+        domain=[('user_id', '!=', False)],
+        help="Empleado del equipo de ventas. Debe tener un usuario de sistema vinculado."
+    )
+    # Usuario derivado del empleado: usado internamente para buscar facturas y equipos CRM
+    user_id = fields.Many2one(
+        'res.users',
+        related='vendedor_id.user_id',
+        string='Usuario del Vendedor',
+        store=False,
+        readonly=True,
+    )
     fecha_inicio = fields.Date(string='Fecha Inicio', required=True, tracking=True)
     fecha_fin = fields.Date(string='Fecha Fin', required=True, tracking=True)
     meta_id = fields.Many2one('meta.vendedor', string='Meta Mensual', required=True, tracking=True)
@@ -78,7 +93,10 @@ class CalculoComision(models.Model):
     @api.depends('vendedor_id')
     def _compute_is_supervisor_role(self):
         for record in self:
-            record.is_supervisor_role = bool(self.env['crm.team'].search_count([('user_id', '=', record.vendedor_id.id)]))
+            uid = record.vendedor_id.user_id.id if record.vendedor_id.user_id else False
+            record.is_supervisor_role = bool(
+                uid and self.env['crm.team'].search_count([('user_id', '=', uid)])
+            )
 
     @api.onchange('vendedor_id', 'fecha_inicio', 'modo_periodo', 'quincena_elegida')
     def _onchange_vendedor_periodo(self):
@@ -111,7 +129,7 @@ class CalculoComision(models.Model):
         else:
             self.tipo_periodo = 'personalizado'
             
-        # Búsqueda de Meta automática
+        # Búsqueda de Meta automática — usa user_id del empleado para domain en meta.vendedor
         if self.vendedor_id:
             meta = self.env['meta.vendedor'].search([
                 ('vendedor_id', '=', self.vendedor_id.id),
@@ -165,20 +183,37 @@ class CalculoComision(models.Model):
         """ Motor de cálculo de comisiones por metas de ventas y cobranzas """
         for record in self:
             if not record.meta_id or not record.meta_id.esquema_id:
-                raise UserError(_("El vendedor no tiene una meta o un esquema de comisión asignado."))
-            
+                raise UserError(_("El empleado no tiene una meta o un esquema de comisión asignado."))
+
+            # ── Guardia de seguridad: el empleado debe tener usuario vinculado ──
+            if not record.vendedor_id.user_id:
+                raise UserError(
+                    _("El empleado '%s' no tiene un usuario de sistema vinculado. "
+                      "Ve a Empleados → edita el registro → campo 'Usuario Relacionado'."
+                      ) % record.vendedor_id.name
+                )
+
             meta = record.meta_id
             esquema = meta.esquema_id
-            # Buscamos si el vendedor es líder de algún equipo de ventas
-            equipos_liderados = self.env['crm.team'].search([('user_id', '=', record.vendedor_id.id)])
+            uid = record.vendedor_id.user_id.id  # ID del res.users para búsqueda de facturas
+
+            # Buscamos si el empleado es líder de equipo CRM o tiene subordinados por RRHH (parent_id)
+            equipos_liderados = self.env['crm.team'].search([('user_id', '=', uid)])
+            vendedores_a_calcular = []
+            
             if equipos_liderados:
-                # Caso Supervisor: Calculamos sobre todos los miembros del equipo (incluyéndose a sí mismo)
-                vendedores_a_calcular = equipos_liderados.mapped('member_ids').ids
-                if record.vendedor_id.id not in vendedores_a_calcular:
-                    vendedores_a_calcular.append(record.vendedor_id.id)
-            else:
-                # Caso Vendedor Individual
-                vendedores_a_calcular = [record.vendedor_id.id]
+                vendedores_a_calcular.extend(equipos_liderados.mapped('member_ids').ids)
+                
+            subordinados = self.env['hr.employee'].search([('parent_id', '=', record.vendedor_id.id)])
+            if subordinados:
+                vendedores_a_calcular.extend(subordinados.mapped('user_id').ids)
+                
+            vendedores_a_calcular = list(set([v for v in vendedores_a_calcular if v]))
+            
+            if not vendedores_a_calcular:
+                vendedores_a_calcular = [uid]
+            elif uid not in vendedores_a_calcular:
+                vendedores_a_calcular.append(uid)
 
             # --- 1. CÁLCULO DE VENTAS ---
             # Buscar facturas (out_invoice), publicadas (posted), del equipo/vendedor en el rango de fechas

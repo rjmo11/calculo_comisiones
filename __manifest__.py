@@ -20,9 +20,11 @@
         'sale',
         'account',
         'mail',
-        'crm'],
+        'crm',
+        'hr'],
 
     'data': [
+        'views/calculo_comision_views.xml',
         'security/calculo_comisiones_security.xml',
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
@@ -34,7 +36,6 @@
         'views/crm_team_views.xml',
         'views/esquema_comision_views.xml',
         'views/meta_vendedor_views.xml',
-        'views/calculo_comision_views.xml',
     ],
 
     'demo': [

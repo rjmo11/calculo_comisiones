@@ -9,7 +9,7 @@
                 <header>
                     <button name="accion_duplicar_periodo" string="Duplicar Periodo" type="object" class="oe_highlight"/>
                 </header>
-                <field name="vendedor_id"/>
+                <field name="vendedor_id" widget="many2one_avatar_employee"/>
                 <field name="esquema_id"/>
                 <field name="periodo_mes"/>
                 <field name="periodo_anio" sum=""/>
@@ -31,9 +31,18 @@
                     <field name="state" widget="statusbar" statusbar_visible="active,inactive"/>
                 </header>
                 <sheet>
+                    <field name="user_id" invisible="1"/>
                     <group>
                         <group string="Información General">
-                            <field name="vendedor_id"/>
+                            <field name="vendedor_id" widget="many2one_avatar_employee"/>
+                            <!-- Advertencia si el empleado no tiene usuario vinculado -->
+                            <div class="alert alert-warning" role="alert" 
+                                 invisible="not vendedor_id or user_id">
+                                <i class="fa fa-exclamation-triangle me-1"/>
+                                <strong>Sin usuario vinculado.</strong>
+                                Asigna un usuario en el registro del empleado para activar
+                                el cálculo de ventas y cobranzas.
+                            </div>
                             <field name="esquema_id"/>
                             <field name="es_supervisor"/>
                             <field name="moneda_id"/>
@@ -67,7 +76,7 @@
                 <field name="vendedor_id"/>
                 <field name="periodo_mes"/>
                 <field name="periodo_anio"/>
-                <filter string="Mis Metas" name="my_goals" domain="[('vendedor_id', '=', uid)]"/>
+                <filter string="Mis Metas" name="my_goals" domain="[('vendedor_id.user_id', '=', uid)]"/>
                 <filter string="Activas" name="active_goals" domain="[('state', '=', 'active')]"/>
                 <group expand="0" string="Agrupar Por">
                     <filter string="Vendedor" name="group_by_vendedor" context="{'group_by': 'vendedor_id'}"/>

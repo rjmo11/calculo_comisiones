@@ -48,23 +48,37 @@ class ComisionDashboardGeneral(models.TransientModel):
         is_supervisor = user.has_group('calculo_comisiones.group_calculo_comisiones_supervisor')
         
         if is_admin:
-            vendedores_permitidos = None 
+            vendedores_permitidos = None
         elif is_supervisor:
             equipos = self.env['crm.team'].sudo().search([('user_id', '=', user.id)])
-            vendedores_permitidos = equipos.mapped('member_ids').ids
-            if user.id not in vendedores_permitidos:
-                vendedores_permitidos.append(user.id)
+            # Obtenemos los IDs de empleados que tengan user_id en la lista de miembros
+            member_user_ids = equipos.mapped('member_ids').ids
+            if user.id not in member_user_ids:
+                member_user_ids.append(user.id)
+            # Buscar empleados por user_id
+            empleados_permitidos = self.env['hr.employee'].sudo().search(
+                [('user_id', 'in', member_user_ids)]
+            )
+            vendedores_permitidos = empleados_permitidos.ids
         else:
-            vendedores_permitidos = [user.id]
+            # Vendedor individual: buscar su propio hr.employee
+            mi_empleado = self.env['hr.employee'].sudo().search(
+                [('user_id', '=', user.id)], limit=1
+            )
+            vendedores_permitidos = [mi_empleado.id] if mi_empleado else []
 
         domain = [('periodo_anio', '=', today.year), ('periodo_mes', '=', str(today.month))]
         if vendedores_permitidos is not None:
             domain.append(('vendedor_id', 'in', vendedores_permitidos))
         if equipo_filter and equipo_filter != 'all' and equipo_filter.isdigit():
             equipo = self.env['crm.team'].sudo().browse(int(equipo_filter))
-            # Incluir a todos los miembros + el líder del equipo para transparencia total
-            usuarios_equipo = equipo.member_ids.ids + [equipo.user_id.id]
-            domain.append(('vendedor_id', 'in', usuarios_equipo))
+            # IDs de usuarios del equipo (miembros + líder)
+            usuarios_equipo = equipo.member_ids.ids + ([equipo.user_id.id] if equipo.user_id else [])
+            # Convertir a IDs de empleados
+            empleados_equipo = self.env['hr.employee'].sudo().search(
+                [('user_id', 'in', usuarios_equipo)]
+            )
+            domain.append(('vendedor_id', 'in', empleados_equipo.ids))
 
         metas_mes = self.env['meta.vendedor'].search(domain)
         
@@ -76,18 +90,22 @@ class ComisionDashboardGeneral(models.TransientModel):
             if not meta.es_supervisor:
                 t_facturado += meta.venta_real_actual
                 t_cobrado += meta.cobranza_real_actual
-                t_meta_v += meta.meta_venta
+                t_meta_v += meta.meta_venta_dinamica
             
             # El bono sí lo sumamos para todos (todos cobran)
             t_bono += meta.comision_proyectada
             
             lineas.append((0, 0, {
                 'vendedor_id': meta.vendedor_id.id,
+                'sin_usuario': not meta.vendedor_id.user_id,
                 'es_supervisor': meta.es_supervisor,
                 'rol_label': 'SUPERVISOR' if meta.es_supervisor else 'VENDEDOR',
-                'meta_venta': meta.meta_venta,
+                'meta_venta': meta.meta_venta_dinamica,
                 'venta_lograda': meta.venta_real_actual,
                 'progreso_porcentaje': meta.progreso_venta_pct,
+                'meta_cobranza': meta.meta_cobranza_dinamica,
+                'cobranza_lograda': meta.cobranza_real_actual,
+                'progreso_cobranza_porcentaje': meta.progreso_cobranza_pct,
                 'bono_estimado': meta.comision_proyectada,
                 'currency_id': meta.moneda_id.id
             }))
@@ -135,11 +153,19 @@ class ComisionDashboardVendedor(models.TransientModel):
     _description = 'Detalle de Barras para Dashboard'
 
     dashboard_id = fields.Many2one('comision.dashboard.general', required=True, ondelete='cascade')
-    vendedor_id = fields.Many2one('res.users', string='Vendedor')
+    vendedor_id = fields.Many2one('hr.employee', string='Empleado')
+    sin_usuario = fields.Boolean(
+        string='Sin Usuario Vinculado',
+        default=False,
+        help="True cuando el empleado no tiene un res.users asignado. Se usa para mostrar advertencia en la vista."
+    )
     es_supervisor = fields.Boolean(string='Es Supervisor', store=False)
     rol_label = fields.Char(string='Rol')
-    meta_venta = fields.Monetary(string='Meta', currency_field='currency_id')
+    meta_venta = fields.Monetary(string='Meta Venta', currency_field='currency_id')
     venta_lograda = fields.Monetary(string='Logro Venta', currency_field='currency_id')
     progreso_porcentaje = fields.Float(string='Termómetro de Ventas')
+    meta_cobranza = fields.Monetary(string='Meta Cobranza', currency_field='currency_id')
+    cobranza_lograda = fields.Monetary(string='Logro Cobranza', currency_field='currency_id')
+    progreso_cobranza_porcentaje = fields.Float(string='Termómetro de Cobranza')
     bono_estimado = fields.Monetary(string='Bono Estimado', currency_field='currency_id')
     currency_id = fields.Many2one('res.currency', string="Moneda")

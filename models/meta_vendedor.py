@@ -10,9 +10,17 @@ class MetaVendedor(models.Model):
     _description = 'Metas Mensuales de Vendedor'
 
     vendedor_id = fields.Many2one(
-        'res.users', string='Vendedor', required=True,
-        domain=[('share', '=', False), ('active', '=', True)],
-        help="Usuario vendedor activo"
+        'hr.employee', string='Vendedor', required=True,
+        domain=[('user_id', '!=', False)],
+        help="Empleado vendedor vinculado a un usuario de sistema"
+    )
+    # Campo relacionado para mantener retrocompatibilidad con la lógica de facturas
+    user_id = fields.Many2one(
+        'res.users',
+        related='vendedor_id.user_id',
+        string='Usuario del Vendedor',
+        store=False,
+        readonly=True,
     )
     # Rastro del departamento eliminado para favorecer flexibilidad dinámica por equipos estándar.
     esquema_id = fields.Many2one(
@@ -43,8 +51,8 @@ class MetaVendedor(models.Model):
     bono_base_cobranza = fields.Monetary(string='Bono Base Cobranza', currency_field='moneda_id')
 
     _sql_constraints = [
-        ('vendedor_periodo_unique', 'unique(vendedor_id, periodo_mes, periodo_anio)', 
-         'El vendedor ya tiene una meta asignada para este periodo (mes/año).')
+        ('vendedor_periodo_unique', 'unique(vendedor_id, periodo_mes, periodo_anio)',
+         'El empleado ya tiene una meta asignada para este periodo (mes/año).')
     ]
 
     @api.depends('vendedor_id', 'periodo_mes', 'periodo_anio')
@@ -61,6 +69,13 @@ class MetaVendedor(models.Model):
         calculo = CalculoObj.search([('meta_id', '=', self.id)], order='id desc', limit=1)
         
         if not calculo:
+            # Guardia: el empleado debe tener usuario vinculado
+            if not self.vendedor_id.user_id:
+                from odoo.exceptions import UserError
+                raise UserError(
+                    f"El empleado '{self.vendedor_id.name}' no tiene un usuario de sistema vinculado. "
+                    "Ve a Empleados y asigna el campo 'Usuario Relacionado' antes de continuar."
+                )
             try:
                 mes = int(self.periodo_mes)
                 anio = int(self.periodo_anio)
@@ -96,6 +111,8 @@ class MetaVendedor(models.Model):
 
     # --- CAMPOS COMPUTADOS PARA DASHBOARD (EN VIVO) ---
     is_current_month = fields.Boolean(string='Es Mes Actual', compute='_compute_is_current_month', search='_search_is_current_month')
+    meta_venta_dinamica = fields.Monetary(string='Meta Venta Dinámica', currency_field='moneda_id', compute='_compute_dashboard_metrics')
+    meta_cobranza_dinamica = fields.Monetary(string='Meta Cobranza Dinámica', currency_field='moneda_id', compute='_compute_dashboard_metrics')
     venta_real_actual = fields.Monetary(string='Venta Real Actual', currency_field='moneda_id', compute='_compute_dashboard_metrics')
     cobranza_real_actual = fields.Monetary(string='Cobranza Real Actual', currency_field='moneda_id', compute='_compute_dashboard_metrics')
     progreso_venta_pct = fields.Float(string='% Cumplimiento Venta', compute='_compute_dashboard_metrics')
@@ -122,6 +139,8 @@ class MetaVendedor(models.Model):
             record.progreso_venta_pct = 0.0
             record.progreso_cobranza_pct = 0.0
             record.comision_proyectada = 0.0
+            record.meta_venta_dinamica = record.meta_venta
+            record.meta_cobranza_dinamica = record.meta_cobranza
 
             if not record.periodo_anio or not record.periodo_mes:
                 continue
@@ -136,13 +155,49 @@ class MetaVendedor(models.Model):
                 continue
 
             # Reutiliza la lógica de rol (vendedor/equipo) del calculo de comisión
-            equipos_liderados = self.env['crm.team'].search([('user_id', '=', record.vendedor_id.id)])
+            # Ahora obtenemos el user_id desde el empleado para buscar facturas
+            uid = record.vendedor_id.user_id.id if record.vendedor_id.user_id else False
+            if not uid:
+                # Sin usuario vinculado: mostrar ceros, no crashear
+                continue
+
+            equipos_liderados = self.env['crm.team'].search([('user_id', '=', uid)])
+            vendedores_a_calcular = []
+            
             if equipos_liderados:
-                vendedores_a_calcular = equipos_liderados.mapped('member_ids').ids
-                if record.vendedor_id.id not in vendedores_a_calcular:
-                    vendedores_a_calcular.append(record.vendedor_id.id)
-            else:
-                vendedores_a_calcular = [record.vendedor_id.id]
+                vendedores_a_calcular.extend(equipos_liderados.mapped('member_ids').ids)
+                
+            # Agregar soporte por si el supervisor usa la jerarquía nativa de Empleados (parent_id)
+            subordinados = self.env['hr.employee'].search([('parent_id', '=', record.vendedor_id.id)])
+            if subordinados:
+                vendedores_a_calcular.extend(subordinados.mapped('user_id').ids)
+                
+            vendedores_a_calcular = list(set([v for v in vendedores_a_calcular if v]))
+            
+            if not vendedores_a_calcular:
+                vendedores_a_calcular = [uid]
+            elif uid not in vendedores_a_calcular:
+                vendedores_a_calcular.append(uid)
+
+            # --- DYNAMIC METAS FOR SUPERVISORS ---
+            meta_v_efectiva = record.meta_venta
+            meta_c_efectiva = record.meta_cobranza
+
+            if record.es_supervisor:
+                member_user_ids = [m_id for m_id in vendedores_a_calcular if m_id != uid]
+                if member_user_ids:
+                    emp_miembros = self.env['hr.employee'].search([('user_id', 'in', member_user_ids)])
+                    if emp_miembros:
+                        metas_equipo = self.env['meta.vendedor'].search([
+                            ('vendedor_id', 'in', emp_miembros.ids),
+                            ('periodo_anio', '=', record.periodo_anio),
+                            ('periodo_mes', '=', record.periodo_mes)
+                        ])
+                        meta_v_efectiva += sum(metas_equipo.mapped('meta_venta'))
+                        meta_c_efectiva += sum(metas_equipo.mapped('meta_cobranza'))
+
+            record.meta_venta_dinamica = meta_v_efectiva
+            record.meta_cobranza_dinamica = meta_c_efectiva
 
             # 1. Ventas
             facturas = self.env['account.move'].search([
@@ -177,8 +232,8 @@ class MetaVendedor(models.Model):
             record.cobranza_real_actual = total_cobranzas
 
             # 3. Cumplimiento
-            ratio_v = (total_ventas / record.meta_venta) if record.meta_venta else 0.0
-            ratio_c = (total_cobranzas / record.meta_cobranza) if record.meta_cobranza else 0.0
+            ratio_v = (total_ventas / meta_v_efectiva) if meta_v_efectiva else 0.0
+            ratio_c = (total_cobranzas / meta_c_efectiva) if meta_c_efectiva else 0.0
             
             # Limitar visualmente pero mantener la lógica base
             record.progreso_venta_pct = ratio_v * 100.0
