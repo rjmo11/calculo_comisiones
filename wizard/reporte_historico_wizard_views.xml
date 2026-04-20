@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_reporte_historico_wizard_form" model="ir.ui.view">
+        <field name="name">wizard.reporte.historico.comisiones.form</field>
+        <field name="model">wizard.reporte.historico.comisiones</field>
+        <field name="arch" type="xml">
+            <form string="Reporte Histórico de Comisiones">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        Genera un informe unificado de los periodos evaluados y tipo de pagos por vendedor en un bloque de tiempo de múltiples meses.
+                    </div>
+                    <group>
+                        <group string="Rango de Fechas">
+                            <field name="fecha_inicio"/>
+                            <field name="fecha_fin"/>
+                        </group>
+                        <group string="Filtros">
+                            <field name="vendedor_ids" widget="many2many_tags" options="{'no_create': True}" placeholder="Dejar vacío para todos..."/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Generar Reporte (PDF)" name="action_generate_report" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_reporte_historico_wizard" model="ir.actions.act_window">
+        <field name="name">Generar Reporte Histórico</field>
+        <field name="res_model">wizard.reporte.historico.comisiones</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_reporte_historico"
+              name="Reporte Histórico"
+              parent="menu_calculo_comisiones_root"
+              action="action_reporte_historico_wizard"
+              sequence="50"/>
+</odoo>

@@ -260,6 +260,10 @@ class CalculoComision(models.Model):
             ratio_v = (total_ventas / meta_v_ajustada) if meta_v_ajustada else 0.0
             ratio_c = (total_cobranzas / meta_c_ajustada) if meta_c_ajustada else 0.0
 
+            # LÍMITE DE Q1: El ratio para la escala se limita al 100% (1.0) para frenar sobrecumplimiento
+            ratio_v_escala = min(ratio_v, 1.0) if record.tipo_periodo == 'quincena1' else ratio_v
+            ratio_c_escala = min(ratio_c, 1.0) if record.tipo_periodo == 'quincena1' else ratio_c
+
             def _get_factor(ratio):
                 linea = self.env['esquema.comision.linea'].search([
                     ('esquema_id', '=', esquema.id),
@@ -275,8 +279,8 @@ class CalculoComision(models.Model):
                     return highest.factor_pago
                 return 0.0
 
-            factor_v = _get_factor(ratio_v)
-            factor_c = _get_factor(ratio_c)
+            factor_v = _get_factor(ratio_v_escala)
+            factor_c = _get_factor(ratio_c_escala)
             
             # El bono base NO se prorratea, se paga lo que dice la escala sobre el monto base
             # Pero si es Q1, pagamos solo el 50% del bono resultante de la escala? 

@@ -82,17 +82,36 @@
                         }
                     </style>
                     
-                    <!-- ENCABEZADO Y FILTROS -->
-                    <div class="row align-items-center mb-4 pb-3" style="border-bottom: 2px solid #eee;">
-                        <div class="col-8">
+                    <!-- ENCABEZADO Y FILTROS AVANZADOS -->
+                    <div class="row align-items-center mb-2">
+                        <div class="col-12">
                             <h1 class="text-primary fw-bold" style="font-size: 2.2rem; letter-spacing: -1px;">
                                 <i class="fa fa-tachometer me-2"/> Panel de Control: Comisiones
                             </h1>
                         </div>
-                        <div class="col-4 text-end">
-                            <!-- Filtro de Equipo que recarga todo vía onchange -->
-                            <field name="equipo_filter" widget="radio" options="{'horizontal': true}" class="fw-bold"/>
-                        </div>
+                    </div>
+                    
+                    <div class="row mb-4 pb-3" style="border-bottom: 2px solid #eee; background-color: #f8f9fa; padding: 12px; border-radius: 8px;">
+                         <div class="col-2">
+                                <label for="filtro_mes" class="fw-bold text-muted mb-3 d-block" style="font-size: 0.8rem; text-transform: uppercase;">Mes Consultar</label>
+                                <field name="filtro_mes" widget="selection"/>
+                         </div>
+                         <div class="col-2">
+                                <label for="filtro_anio" class="fw-bold text-muted mb-3 d-block" style="font-size: 0.8rem; text-transform: uppercase;">Año Consultar</label>
+                                <field name="filtro_anio" widget="selection"/>
+                         </div>
+                         <div class="col-3">
+                                <label for="filtro_corte" class="fw-bold text-muted mb-3 d-block" style="font-size: 0.8rem; text-transform: uppercase;">Sub-Período / Corte</label>
+                                <field name="filtro_corte" widget="selection"/>
+                         </div>
+                         <div class="col-3">
+                                <label for="filtro_vendedor_id" class="fw-bold text-muted mb-3 d-block" style="font-size: 0.8rem; text-transform: uppercase;">Filtrar Vendedor</label>
+                                <field name="filtro_vendedor_id" options="{'no_create': True, 'no_open': True}" placeholder="Todos..."/>
+                         </div>
+                         <div class="col-2">
+                                <label for="departamento_filter" class="fw-bold text-muted mb-3 d-block" style="font-size: 0.8rem; text-transform: uppercase;">Departamento</label>
+                                <field name="departamento_filter" widget="selection" class="fw-bold"/>
+                         </div>
                     </div>
 
                     <!-- TARJETAS KPI (USANDO INVISIBLE CONDICIONAL PARA LOS GATILLOS DE COLORES) -->

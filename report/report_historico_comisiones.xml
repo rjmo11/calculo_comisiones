@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_historico_comisiones" model="ir.actions.report">
+        <field name="name">Reporte Histórico de Comisiones</field>
+        <field name="model">wizard.reporte.historico.comisiones</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">calculo_comisiones.report_historico_comisiones_template</field>
+        <field name="report_file">calculo_comisiones.report_historico_comisiones_template</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+    <template id="report_historico_comisiones_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <style>
+                    .table-header th { background-color: #f8f9fa; border-bottom: 2px solid #333; }
+                </style>
+                <t t-foreach="docs" t-as="wizard">
+                    <div class="page" style="font-size: 13px;">
+                        <div class="row align-items-center mb-4">
+                            <div class="col-3">
+                                <img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" style="max-height: 70px;" alt="Logo Dimac 21"/>
+                            </div>
+                            <div class="col-9 text-end">
+                                <h3 class="fw-bold mb-0 text-primary">Reporte Histórico de Comisiones</h3>
+                                <h5 class="text-muted mt-2">
+                                    Periodo: <span t-field="wizard.fecha_inicio"/> al <span t-field="wizard.fecha_fin"/>
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <t t-set="calculos_obj" t-value="wizard.get_calculos()"/>
+                        <t t-set="vendedores" t-value="calculos_obj.mapped('vendedor_id')"/>
+                        
+                        <t t-foreach="vendedores" t-as="vendedor">
+                            <div style="page-break-inside: avoid;">
+                                <t t-set="calculos_vendedor" t-value="calculos_obj.filtered(lambda c: c.vendedor_id == vendedor).sorted(key=lambda c: c.fecha_inicio)"/>
+                                
+                                <div class="mt-4 mb-2 p-2 border" style="background-color: #e9ecef; border-radius: 4px;">
+                                    <h5 class="mb-0 fw-bold"><i class="fa fa-user me-2"/> <span t-field="vendedor.name"/></h5>
+                                </div>
+                                
+                                <table class="table table-sm" style="margin-bottom: 30px;">
+                                    <thead class="table-header">
+                                        <tr>
+                                            <th>Fecha / Mes Evaluado</th>
+                                            <th>Tipo de Liquidación</th>
+                                            <th class="text-end">Logro Ventas (Neto)</th>
+                                            <th class="text-end">Adelanto Descontado</th>
+                                            <th class="text-end">Comisión Final / Ganancia</th>
+                                            <th class="text-center">Estatus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-set="total_bonos" t-value="0.0"/>
+                                        <t t-foreach="calculos_vendedor" t-as="calc">
+                                            <tr>
+                                                <td>
+                                                    <span t-field="calc.fecha_inicio"/> a <span t-field="calc.fecha_fin"/>
+                                                </td>
+                                                <td>
+                                                    <t t-if="calc.tipo_periodo == 'quincena1'">
+                                                        <span class="badge" style="background-color: #FD7E14; color: white;">1ra Quincena (50% Tope)</span>
+                                                    </t>
+                                                    <t t-elif="calc.tipo_periodo == 'quincena2'">
+                                                        <span class="badge text-bg-info">2da Quincena (Ajuste)</span>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="badge text-bg-success">Mensual Completo</span>
+                                                    </t>
+                                                </td>
+                                                <td class="text-end"><span t-field="calc.venta_real_monto"/></td>
+                                                <td class="text-end"><span t-field="calc.importe_adelanto"/></td>
+                                                <td class="text-end fw-bold">
+                                                    <span t-field="calc.total_a_pagar"/>
+                                                    <t t-set="total_bonos" t-value="total_bonos + calc.total_a_pagar"/>
+                                                </td>
+                                                <td class="text-center">
+                                                    <t t-if="calc.state == 'approved'">Aprobado</t>
+                                                    <t t-else="">Por Aprobar</t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <tr style="border-top: 2px solid #000; background-color: #fcfcfc;">
+                                            <td colspan="4" class="text-end pt-3"><strong>Total Cobrado por Vendedor en Periodo Consultado:</strong></td>
+                                            <td class="text-end pt-3 text-success fw-bold" style="font-size: 15px;"><span t-esc="total_bonos" t-options='{"widget": "monetary", "display_currency": env.company.currency_id or calculos_vendedor[0].currency_id}'/></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

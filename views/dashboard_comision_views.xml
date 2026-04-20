@@ -11,6 +11,8 @@
                     <filter string="Mes en Curso" name="current_month" 
                         domain="[('is_current_month', '=', True)]"/>
                     <group expand="0" string="Agrupar por">
+                        <filter string="Año" name="group_anio" context="{'group_by':'periodo_anio'}"/>
+                        <filter string="Mes" name="group_mes" context="{'group_by':'periodo_mes'}"/>
                         <filter string="Vendedor" name="group_vendedor" context="{'group_by':'vendedor_id'}"/>
                     </group>
                     <!-- Panel Izquierdo de Filtrado Rápido (Pestañas) -->

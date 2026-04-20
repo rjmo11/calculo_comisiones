@@ -149,8 +149,25 @@ class MetaVendedor(models.Model):
                 mes = int(record.periodo_mes)
                 anio = int(record.periodo_anio)
                 _weekday, ultimo_dia = calendar.monthrange(anio, mes)
+                
                 fecha_inicio = date(anio, mes, 1)
                 fecha_fin = date(anio, mes, ultimo_dia)
+                
+                corte = self.env.context.get('dashboard_corte', 'todo')
+                if corte == 'q1':
+                    fecha_fin = date(anio, mes, 15)
+                elif corte == 'q2':
+                    fecha_inicio = date(anio, mes, 16)
+                elif corte == 's1':
+                    fecha_fin = date(anio, mes, min(7, ultimo_dia))
+                elif corte == 's2':
+                    fecha_inicio = date(anio, mes, 8)
+                    fecha_fin = date(anio, mes, min(14, ultimo_dia))
+                elif corte == 's3':
+                    fecha_inicio = date(anio, mes, 15)
+                    fecha_fin = date(anio, mes, min(21, ultimo_dia))
+                elif corte == 's4':
+                    fecha_inicio = date(anio, mes, 22)
             except ValueError:
                 continue
 

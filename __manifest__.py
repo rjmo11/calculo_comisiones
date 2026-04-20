@@ -30,6 +30,8 @@
         'data/ir_sequence_data.xml',
         'report/reports.xml',
         'report/report_calculo_comision_templates.xml',
+        'report/report_historico_comisiones.xml',
+        'wizard/reporte_historico_wizard_views.xml',
         'views/account_payment_views.xml',
         'views/dashboard_general_views.xml',
         'views/dashboard_comision_views.xml',

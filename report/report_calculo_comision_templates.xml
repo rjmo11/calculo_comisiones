@@ -39,7 +39,7 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <strong>Nombre:</strong> <span t-field="doc.vendedor_id.name"/><br/>
-                                        <strong>Cédula / RIF:</strong> <span t-field="doc.vendedor_id.partner_id.vat"/><br/>
+                                        <strong>Cédula / RIF:</strong> <span t-esc="doc.vendedor_id.user_id.partner_id.vat or doc.vendedor_id.identification_id or 'N/D'"/><br/>
                                         <strong>Cargo:</strong> Vendedor
                                     </div>
                                     <div class="col-6 text-end">
@@ -173,7 +173,7 @@
                             <div class="col-6 text-center">
                                 <div style="border-top: 1px solid black; width: 80%; margin: 0 auto; padding-top: 5px;">
                                     <strong>Firma del Trabajador</strong><br/>
-                                    <span>C.I. <span t-field="doc.vendedor_id.partner_id.vat"/></span>
+                                    <span>C.I. / RIF: <span t-esc="doc.vendedor_id.user_id.partner_id.vat or doc.vendedor_id.identification_id or 'N/D'"/></span>
                                 </div>
                             </div>
                             <div class="col-6 text-center">

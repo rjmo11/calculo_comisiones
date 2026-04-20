@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vista Árbol -->
     <record id="view_meta_vendedor_list" model="ir.ui.view">
         <field name="name">meta.vendedor.list</field>
         <field name="model">meta.vendedor</field>
@@ -12,16 +11,18 @@
                 <field name="vendedor_id" widget="many2one_avatar_employee"/>
                 <field name="esquema_id"/>
                 <field name="periodo_mes"/>
-                <field name="periodo_anio" sum=""/>
-                <field name="meta_venta" sum="Total Meta Venta"/>
-                <field name="meta_cobranza" sum="Total Meta Cobranza"/>
+                <field name="periodo_anio"/>
+                
                 <field name="moneda_id" column_invisible="True"/>
+                
+                <field name="meta_venta" widget="monetary" options="{'currency_field': 'moneda_id'}" sum="Total Meta Venta"/>
+                <field name="meta_cobranza" widget="monetary" options="{'currency_field': 'moneda_id'}" sum="Total Meta Cobranza"/>
+                
                 <field name="state" widget="badge" decoration-success="state == 'active'" decoration-info="state == 'inactive'"/>
             </list>
         </field>
     </record>
 
-    <!-- Vista Formulario -->
     <record id="view_meta_vendedor_form" model="ir.ui.view">
         <field name="name">meta.vendedor.form</field>
         <field name="model">meta.vendedor</field>
@@ -35,7 +36,6 @@
                     <group>
                         <group string="Información General">
                             <field name="vendedor_id" widget="many2one_avatar_employee"/>
-                            <!-- Advertencia si el empleado no tiene usuario vinculado -->
                             <div class="alert alert-warning" role="alert" 
                                  invisible="not vendedor_id or user_id">
                                 <i class="fa fa-exclamation-triangle me-1"/>
@@ -54,12 +54,12 @@
                     </group>
                     <group>
                         <group string="Metas (Importes)">
-                            <field name="meta_venta"/>
-                            <field name="meta_cobranza"/>
+                            <field name="meta_venta" widget="monetary" options="{'currency_field': 'moneda_id'}"/>
+                            <field name="meta_cobranza" widget="monetary" options="{'currency_field': 'moneda_id'}"/>
                         </group>
                         <group string="Bonos Base (100%)">
-                            <field name="bono_base_venta"/>
-                            <field name="bono_base_cobranza"/>
+                            <field name="bono_base_venta" widget="monetary" options="{'currency_field': 'moneda_id'}"/>
+                            <field name="bono_base_cobranza" widget="monetary" options="{'currency_field': 'moneda_id'}"/>
                         </group>
                     </group>
                 </sheet>
@@ -67,7 +67,6 @@
         </field>
     </record>
 
-    <!-- Vista Búsqueda -->
     <record id="view_meta_vendedor_search" model="ir.ui.view">
         <field name="name">meta.vendedor.search</field>
         <field name="model">meta.vendedor</field>
@@ -88,7 +87,6 @@
         </field>
     </record>
 
-    <!-- Acción -->
     <record id="action_meta_vendedor" model="ir.actions.act_window">
         <field name="name">Metas de Vendedores</field>
         <field name="res_model">meta.vendedor</field>
@@ -101,9 +99,8 @@
         </field>
     </record>
 
-    <!-- Menú -->
     <menuitem id="menu_meta_vendedor"
-              name="Metas de Vendedores (VZLA)"
+              name="Metas de Vendedores"
               parent="menu_calculo_comisiones_root"
               action="action_meta_vendedor"
               sequence="20"/>

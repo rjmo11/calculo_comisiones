@@ -29,7 +29,7 @@
         <record id="rule_meta_vendedor_all" model="ir.rule">
             <field name="name">Metas: Supervisor (Equipo)</field>
             <field name="model_id" ref="model_meta_vendedor"/>
-            <field name="domain_force">['|', ('vendedor_id.user_id', '=', user.id), ('vendedor_id.user_id.sale_team_id.user_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('vendedor_id.user_id', '=', user.id), ('vendedor_id.parent_id.user_id', '=', user.id), ('vendedor_id.user_id.sale_team_id.user_id', '=', user.id)]</field>
             <field name="groups" eval="[(6, 0, [ref('group_calculo_comisiones_supervisor')])]"/>
         </record>
 
@@ -50,7 +50,7 @@
         <record id="rule_calculo_comision_all" model="ir.rule">
             <field name="name">Cálculos: Supervisor (Equipo)</field>
             <field name="model_id" ref="model_calculo_comision"/>
-            <field name="domain_force">['|', ('vendedor_id.user_id', '=', user.id), ('vendedor_id.user_id.sale_team_id.user_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('vendedor_id.user_id', '=', user.id), ('vendedor_id.parent_id.user_id', '=', user.id), ('vendedor_id.user_id.sale_team_id.user_id', '=', user.id)]</field>
             <field name="groups" eval="[(6, 0, [ref('group_calculo_comisiones_supervisor')])]"/>
         </record>
 

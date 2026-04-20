@@ -75,7 +75,7 @@
               sequence="10"/>
 
     <menuitem id="menu_configuracion_comisiones"
-              name="Configuración (VZLA)"
+              name="Configuración"
               parent="menu_calculo_comisiones_root"
               sequence="100"/>
 
