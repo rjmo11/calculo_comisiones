@@ -32,9 +32,15 @@ class MetaVendedor(models.Model):
         ('5', 'Mayo'), ('6', 'Junio'), ('7', 'Julio'), ('8', 'Agosto'),
         ('9', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
     ], string='Mes', required=True, default=lambda self: str(date.today().month))
-    periodo_anio = fields.Integer(
-        string='Año', required=True, default=lambda self: date.today().year,
-        group_operator=False
+    @api.model
+    def _get_year_selection(self):
+        current_year = date.today().year
+        return [(str(y), str(y)) for y in range(current_year - 5, current_year + 6)]
+
+    periodo_anio = fields.Selection(
+        selection='_get_year_selection',
+        string='Año', required=True, 
+        default=lambda self: str(date.today().year)
     )
     moneda_id = fields.Many2one(
         'res.currency', string='Moneda', required=True,
@@ -128,7 +134,7 @@ class MetaVendedor(models.Model):
         if operator != '=' or not value:
             return []
         today = fields.Date.context_today(self)
-        return [('periodo_anio', '=', today.year), ('periodo_mes', '=', str(today.month))]
+        return [('periodo_anio', '=', str(today.year)), ('periodo_mes', '=', str(today.month))]
 
     def _compute_dashboard_metrics(self):
         """Calcula el progreso de ventas y cobranzas para el mes vigente."""
@@ -292,7 +298,7 @@ class MetaVendedor(models.Model):
                 'vendedor_id': record.vendedor_id.id,
                 'es_supervisor': record.es_supervisor,
                 'periodo_mes': str(next_date.month),
-                'periodo_anio': next_date.year,
+                'periodo_anio': str(next_date.year),
                 'moneda_id': record.moneda_id.id,
                 'meta_venta': record.meta_venta,
                 'meta_cobranza': record.meta_cobranza,
@@ -303,7 +309,7 @@ class MetaVendedor(models.Model):
             exists = self.search([
                 ('vendedor_id', '=', record.vendedor_id.id),
                 ('periodo_mes', '=', str(next_date.month)),
-                ('periodo_anio', '=', next_date.year)
+                ('periodo_anio', '=', str(next_date.year))
             ])
             if not exists:
                 self.create(new_vals)

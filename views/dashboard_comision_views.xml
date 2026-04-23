@@ -17,6 +17,7 @@
                     </group>
                     <!-- Panel Izquierdo de Filtrado Rápido (Pestañas) -->
                     <searchpanel>
+                        <field name="periodo_anio" icon="fa-calendar" select="multi" enable_counters="1" string="Año"/>
                         <field name="periodo_mes" icon="fa-calendar-o" select="multi" enable_counters="1" string="Mes"/>
                     </searchpanel>
                 </search>
