@@ -61,7 +61,7 @@
                             text-decoration: none !important;
                         }
 
-                        /* Global Symbol Styling (Bs.F, %) - Solid and clear */
+                        /* Global Symbol Styling (Bs.S, %) - Solid and clear */
                         .kpi-card-value .o_field_monetary span:not(.oe_currency_value),
                         .kpi-card-value span.o_percentage_symbol,
                         .kpi-card-value .o_field_percentage span:not(.oe_percentage_value) {

@@ -9,7 +9,7 @@
                 <field name="vendedor_id" string="Empleado"/>
                 <field name="fecha_inicio"/>
                 <field name="fecha_fin"/>
-                <field name="currency_id" column_invisible="True"/>
+                <field name="currency_id" invisible="1"/>
                 <field name="total_a_pagar" sum="Total"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'calculated'" decoration-success="state == 'approved'"/>
             </list>
@@ -93,6 +93,7 @@
                         <page string="Detalle de Facturas" name="facturas">
                             <field name="factura_ids" readonly="1">
                                 <list>
+                                    <field name="currency_id" column_invisible="True"/>
                                     <field name="name"/>
                                     <field name="partner_id"/>
                                     <field name="invoice_date"/>
@@ -104,6 +105,7 @@
                         <page string="Detalle de Pagos" name="pagos">
                             <field name="pago_ids" readonly="1">
                                 <list>
+                                    <field name="currency_id" column_invisible="True"/>
                                     <field name="name"/>
                                     <field name="partner_id"/>
                                     <field name="date"/>
