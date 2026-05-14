@@ -2,3 +2,13 @@
 __pycache__/
 *.pyo
 .DS_Store
+
+# Odoo carpetas de datos y config
+/data/
+*.conf
+*.log
+
+# Editores y entorno
+.vscode/
+.idea/
+.env
