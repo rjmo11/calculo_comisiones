@@ -94,7 +94,7 @@
 
     <!-- Menú -->
     <menuitem id="menu_meta_vendedor"
-              name="Metas de Vendedores (VZLA)"
+              name="Metas de Vendedores"
               parent="menu_calculo_comisiones_root"
               action="action_meta_vendedor"
               sequence="20"/>
