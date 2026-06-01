@@ -11,8 +11,32 @@
                 <field name="fecha_fin"/>
                 <field name="currency_id" invisible="1"/>
                 <field name="total_a_pagar" sum="Total"/>
+                <field name="tiene_recibo_firmado" widget="boolean" string="Recibo Cargado" readonly="1"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'calculated'" decoration-success="state == 'approved'"/>
             </list>
+        </field>
+    </record>
+
+    <record id="view_calculo_comision_search" model="ir.ui.view">
+        <field name="name">calculo.comision.search</field>
+        <field name="model">calculo.comision</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Cálculos de Comisión">
+                <field name="name" string="Referencia"/>
+                <field name="vendedor_id" string="Empleado"/>
+                <field name="meta_id"/>
+                <filter string="Borrador" name="state_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Calculado" name="state_calculated" domain="[('state', '=', 'calculated')]"/>
+                <filter string="Aprobado" name="state_approved" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter string="Con Recibo Cargado" name="has_recibo" domain="[('tiene_recibo_firmado', '=', True)]"/>
+                <filter string="Sin Recibo Cargado" name="no_recibo" domain="[('tiene_recibo_firmado', '=', False)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Vendedor" name="group_vendedor" context="{'group_by': 'vendedor_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Fecha de Inicio" name="group_fecha_inicio" context="{'group_by': 'fecha_inicio'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
@@ -56,8 +80,10 @@
                                    readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="fecha_inicio" readonly="state != 'draft'" invisible="modo_periodo != 'personalizado'"/>
-                            <field name="fecha_fin" readonly="state != 'draft'" invisible="modo_periodo != 'personalizado'"/>
+                            <field name="fecha_inicio" readonly="state != 'draft' or modo_periodo != 'personalizado'" force_save="1"/>
+                            <field name="fecha_fin" readonly="state != 'draft' or modo_periodo != 'personalizado'" force_save="1"/>
+                            <field name="recibo_firmado_filename" invisible="1"/>
+                            <field name="recibo_firmado" filename="recibo_firmado_filename" widget="binary"/>
                         </group>
                     </group>
                     <notebook>

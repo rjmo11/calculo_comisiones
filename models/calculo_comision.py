@@ -343,3 +343,16 @@ class CalculoComision(models.Model):
             'url': '/calculo_comisiones/export_xlsx?ids=%s' % ids_str,
             'target': 'self',
         }
+
+    recibo_firmado = fields.Binary(string='Recibo Firmado PDF', attachment=True, copy=False)
+    recibo_firmado_filename = fields.Char(string='Nombre del Archivo Recibo')
+    tiene_recibo_firmado = fields.Boolean(
+        string='Recibo Cargado',
+        compute='_compute_tiene_recibo_firmado',
+        store=True
+    )
+
+    @api.depends('recibo_firmado')
+    def _compute_tiene_recibo_firmado(self):
+        for record in self:
+            record.tiene_recibo_firmado = bool(record.recibo_firmado)
